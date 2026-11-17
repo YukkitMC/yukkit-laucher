@@ -77,6 +77,15 @@ struct Overview {
     username: String,
 }
 
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct SettingsView {
+    settings: Settings,
+    install_dir: String,
+    default_install_dir: String,
+    version: String,
+}
+
 /// The selected version, or the newest one when nothing (or something unknown) is selected.
 fn selected_id(settings: &Settings, versions: &[catalog::GameVersion]) -> String {
     versions
