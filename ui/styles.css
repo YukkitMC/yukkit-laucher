@@ -14,16 +14,6 @@
 .subtitle { color: var(--muted); margin: 0 0 26px; }
 .title-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
 
-/* Versions list */
-.list { border-top: 1px solid var(--line); }
-.item { display: flex; align-items: center; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--line); }
-.item-main { flex: 1; min-width: 0; }
-.item-title { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-weight: 600; }
-.item-meta { color: var(--muted); font-size: 12px; margin-top: 3px; }
-.item-desc { color: var(--soft); font-size: 13px; margin-top: 6px; }
-.item-actions { display: flex; align-items: center; gap: 8px; }
-.in-use { color: var(--muted); font-size: 13px; padding: 0 6px; }
-
 /* Patch notes */
 .release { padding: 22px 0 18px; border-top: 1px solid var(--line); }
 .release-head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }

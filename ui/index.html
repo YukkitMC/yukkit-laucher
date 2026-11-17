@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/sidebar.css" />
   <link rel="stylesheet" href="css/play.css" />
+  <link rel="stylesheet" href="css/versions.css" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -157,10 +158,14 @@
     </section>
 
     <!-- VERSIONS -->
-    <section class="page" id="page-versions">
-      <h2 class="title">Versions</h2>
-      <p class="subtitle">Each version has its own folder for worlds and settings. Removing one keeps your worlds.</p>
-      <div class="list" id="version-list"></div>
+    <section class="page" id="page-versions" aria-labelledby="versions-title">
+      <header class="page-header">
+        <div>
+          <h1 class="page-title" id="versions-title">Versions</h1>
+          <p class="page-subtitle">Each version has its own folder for worlds and settings. Removing one keeps your worlds.</p>
+        </div>
+      </header>
+      <div class="group" id="version-list"></div>
       <p class="fineprint">More Minecraft versions are on the way. When one is released, it shows up here on its own.</p>
     </section>
 
@@ -293,6 +298,15 @@
       <pre class="log" id="log"></pre>
     </section>
   </main>
+
+  <dialog class="sheet" id="confirm-dialog" aria-labelledby="confirm-title" aria-describedby="confirm-text">
+    <h2 class="sheet-title" id="confirm-title"></h2>
+    <p class="sheet-text" id="confirm-text"></p>
+    <div class="sheet-actions">
+      <button class="btn" id="confirm-cancel" autofocus>Cancel</button>
+      <button class="btn btn-destructive" id="confirm-ok"></button>
+    </div>
+  </dialog>
 
   <div class="toast hidden" id="toast" role="status" aria-live="polite"><svg class="icon" aria-hidden="true"><use href="#i-check-circle"/></svg><span id="toast-text"></span></div>
   <script src="app.js"></script>

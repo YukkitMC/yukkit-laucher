@@ -85,6 +85,7 @@
   --caution-tint: rgba(196, 120, 0, .12);
   --danger: #c62f2f;           /*  5.5:1 */
   --danger-tint: rgba(198, 47, 47, .08);
+  --danger-fill: #c62f2f;      /* white on it 5.5:1, both appearances */
 
   --focus-ring: #0060d6;
   --shadow-float: 0 8px 24px rgba(0, 0, 0, .14), 0 0 0 1px rgba(0, 0, 0, .05);

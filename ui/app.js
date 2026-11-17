@@ -57,6 +57,23 @@ document.addEventListener("keydown", (e) => {
   } catch {}
 })();
 
+/* ---------- Confirmation sheet ----------
+ * Replaces window.confirm(): named destructive action, Cancel is the default and Esc cancels. */
+function confirmSheet({ title, text, action }) {
+  const d = $("confirm-dialog");
+  $("confirm-title").textContent = title;
+  $("confirm-text").textContent = text;
+  $("confirm-ok").textContent = action;
+  return new Promise((resolve) => {
+    const done = (value) => { d.close(); resolve(value); };
+    $("confirm-ok").onclick = () => done(true);
+    $("confirm-cancel").onclick = () => done(false);
+    d.oncancel = (e) => { e.preventDefault(); done(false); };
+    d.showModal();
+    $("confirm-cancel").focus();
+  });
+}
+
 /* ---------- Toast ---------- */
 let toastTimer;
 function toast(text) {
@@ -303,14 +320,13 @@ function setProgress(p) {
 function renderVersions() {
   const o = state.overview;
   const list = $("version-list");
-  if (!o || !o.versions.length) { list.innerHTML = `<p class="muted" style="padding:16px 0">No versions yet.</p>`; return; }
+  if (!o || !o.versions.length) { list.innerHTML = `<p class="list-empty">No versions yet.</p>`; return; }
   list.innerHTML = o.versions
     .map((v) => {
       const inUse = v.id === o.selected;
       const badges = [
-        v.channel ? `<span class="badge amber">${esc(v.channel)}</span>` : "",
+        v.channel ? `<span class="badge caution">${esc(v.channel)}</span>` : "",
         v.installed ? `<span class="badge">Installed</span>` : "",
-        inUse ? `<span class="badge blue">Selected</span>` : "",
       ].join("");
       const meta = [
         `Minecraft ${esc(v.minecraft)}`,
@@ -318,19 +334,21 @@ function renderVersions() {
         v.installed ? `Toolkit ${esc(v.installed.toolkitTag)}` : "Not installed",
       ].join(" · ");
       const actions = [
-        inUse ? `<span class="in-use">In use</span>` : `<button class="btn btn-small" data-use="${esc(v.id)}">Use this version</button>`,
+        inUse
+          ? `<span class="in-use"><svg class="icon" aria-hidden="true"><use href="#i-check-circle"/></svg>In use</span>`
+          : `<button class="btn btn-small" data-use="${esc(v.id)}">Use this version</button>`,
         v.installed
           ? `<button class="btn btn-small btn-quiet btn-danger" data-remove="${esc(v.id)}">Remove</button>`
           : `<button class="btn btn-small btn-primary" data-install="${esc(v.id)}">Install</button>`,
       ].join("");
       return `
-        <div class="item">
-          <div class="item-main">
-            <div class="item-title">${esc(v.name)} ${badges}</div>
-            <div class="item-meta">${meta}</div>
-            ${v.description ? `<div class="item-desc">${esc(v.description)}</div>` : ""}
+        <div class="group-row version-row">
+          <div class="row-main">
+            <div class="row-title">${esc(v.name)} ${badges}</div>
+            <div class="row-subtitle">${meta}</div>
+            ${v.description ? `<div class="version-desc">${esc(v.description)}</div>` : ""}
           </div>
-          <div class="item-actions">${actions}</div>
+          <div class="version-actions">${actions}</div>
         </div>`;
     })
     .join("");
@@ -343,7 +361,12 @@ function renderVersions() {
   }));
   list.querySelectorAll("[data-install]").forEach((b) => (b.onclick = () => installVersion(b.dataset.install)));
   list.querySelectorAll("[data-remove]").forEach((b) => (b.onclick = async () => {
-    if (!confirm(`Remove ${b.dataset.remove}? Your worlds and settings for it are kept.`)) return;
+    const ok = await confirmSheet({
+      title: `Remove ${b.dataset.remove}?`,
+      text: "The game files for this version are deleted. Your worlds and settings for it are kept.",
+      action: "Remove",
+    });
+    if (!ok) return;
     try {
       await invoke("remove_version", { versionId: b.dataset.remove });
       toast("Removed. Your worlds are still there.");
