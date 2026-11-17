@@ -1,0 +1,219 @@
+/* Shared controls. Sizes follow the HIG desktop defaults: 28 pt controls, 20 pt minimum. */
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  height: var(--control-height-lg); padding: 0 var(--space-4);
+  border: 1px solid var(--separator); border-radius: var(--radius-control);
+  background: var(--fill-control); color: var(--label);
+  font: var(--type-body-strong); white-space: nowrap;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, .04);
+  transition: background var(--dur-fast), border-color var(--dur-fast), transform var(--dur-fast);
+}
+.btn:hover:not(:disabled) { background: color-mix(in srgb, var(--fill-control), var(--label) 5%); }
+.btn:active:not(:disabled) { background: color-mix(in srgb, var(--fill-control), var(--label) 10%); }
+.btn:disabled { color: var(--label-3); box-shadow: none; }
+.btn-small { height: var(--control-height); padding: 0 var(--space-3); font: 600 .8125rem/1 var(--font-text); }
+
+.btn-primary { background: var(--accent-fill); border-color: transparent; color: var(--on-accent); }
+.btn-primary:hover:not(:disabled) { background: var(--accent-fill-hover); }
+.btn-primary:active:not(:disabled) { background: var(--accent-fill-pressed); }
+
+.btn-quiet { background: transparent; border-color: transparent; box-shadow: none; color: var(--label); }
+.btn-quiet:hover:not(:disabled) { background: var(--fill-hover); }
+.btn-quiet:active:not(:disabled) { background: var(--fill-pressed); }
+
+.btn-danger { color: var(--danger); }
+.btn-group { display: flex; gap: var(--space-2); flex-shrink: 0; align-items: center; }
+
+.icon-btn {
+  display: inline-grid; place-items: center;
+  width: var(--control-height); height: var(--control-height);
+  background: transparent; border: 0; border-radius: var(--radius-control); color: var(--label-2);
+  transition: background var(--dur-fast), color var(--dur-fast);
+}
+.icon-btn:hover { background: var(--fill-hover); color: var(--label); }
+.icon-btn:active { background: var(--fill-pressed); }
+
+/* Text link: padded so the hit region reaches 28 px without changing its look */
+.link {
+  display: inline-flex; align-items: center; gap: var(--space-1);
+  min-height: var(--control-height); padding: 0 var(--space-2); margin: 0 calc(-1 * var(--space-2));
+  background: none; border: 0; border-radius: var(--radius-control);
+  color: var(--accent); font: var(--type-callout);
+}
+.link:hover { text-decoration: underline; text-underline-offset: 2px; }
+.link .icon { width: 12px; height: 12px; }
+
+/* ---------- Text field ---------- */
+.field {
+  height: var(--control-height-lg); width: 260px; padding: 0 var(--space-3);
+  background: var(--fill-control); color: var(--label);
+  border: 1px solid var(--control-border); border-radius: var(--radius-control);
+  user-select: text;
+  transition: border-color var(--dur-fast), box-shadow var(--dur-fast);
+}
+.field::placeholder { color: var(--label-3); }
+.field:hover { border-color: var(--label-2); }
+.field:focus-visible, .field:focus { outline: none; border-color: var(--focus-ring); box-shadow: 0 0 0 1px var(--focus-ring); }
+.field.mono { font: var(--type-mono); }
+.field.wide { width: 100%; }
+
+/* ---------- Pop-up button (native <select>) ---------- */
+.select { position: relative; display: inline-flex; }
+.select select {
+  appearance: none;
+  height: var(--control-height-lg); min-width: 160px; padding: 0 var(--space-6) 0 var(--space-3);
+  background: var(--fill-control); color: var(--label);
+  border: 1px solid var(--control-border); border-radius: var(--radius-control);
+  font: var(--type-body);
+}
+.select select:hover:not(:disabled) { border-color: var(--label-2); }
+.select select:focus-visible { outline: none; border-color: var(--focus-ring); box-shadow: 0 0 0 1px var(--focus-ring); }
+.select select:disabled { color: var(--label-3); }
+.select .icon { position: absolute; right: var(--space-2); top: 50%; transform: translateY(-50%); color: var(--label-2); pointer-events: none; }
+.select option { background: var(--bg-surface); color: var(--label); }
+
+/* ---------- Segmented control (radiogroup) ---------- */
+.segmented {
+  display: inline-flex; gap: 2px; padding: 2px;
+  background: var(--fill-selected); border-radius: calc(var(--radius-control) + 2px);
+}
+.segmented button {
+  height: calc(var(--control-height) - 4px); min-width: 72px; padding: 0 var(--space-3);
+  background: transparent; border: 0; border-radius: var(--radius-control);
+  color: var(--label); font: var(--type-callout);
+  transition: background var(--dur-fast);
+}
+.segmented button:hover:not(.active) { background: var(--fill-hover); }
+.segmented button.active {
+  background: var(--fill-control); font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .12), 0 0 0 .5px rgba(0, 0, 0, .06);
+}
+
+/* ---------- Switch (real checkbox, kept focusable) ---------- */
+.switch { position: relative; display: inline-flex; align-items: center; }
+.switch input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; }
+.switch-track {
+  position: relative; width: 40px; height: 22px; border-radius: var(--radius-pill);
+  background: var(--fill-track); transition: background var(--dur-fast);
+}
+.switch-track::after {
+  content: ""; position: absolute; left: 2px; top: 2px; width: 18px; height: 18px; border-radius: 50%;
+  background: #ffffff; box-shadow: 0 1px 3px rgba(0, 0, 0, .3);
+  transition: transform var(--dur-base) var(--ease);
+}
+.switch input:checked + .switch-track { background: var(--accent-fill); }
+.switch input:checked + .switch-track::after { transform: translateX(18px); }
+.switch input:focus-visible + .switch-track { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+
+/* ---------- Slider ---------- */
+input[type="range"] { width: 240px; accent-color: var(--accent-fill); }
+
+/* ---------- Badge ---------- */
+.badge {
+  display: inline-flex; align-items: center; height: 18px; padding: 0 var(--space-2);
+  border-radius: var(--radius-pill); font: var(--type-caption);
+  background: var(--fill-selected); color: var(--label-2);
+}
+.badge.accent, .badge.blue { background: var(--accent-tint); color: var(--accent); }
+.badge.caution, .badge.amber { background: var(--caution-tint); color: var(--caution); }
+
+/* ---------- Grouped list (inset grouped) ---------- */
+.group {
+  background: var(--bg-surface); border-radius: var(--radius-group);
+  border: 1px solid var(--separator);
+  overflow: hidden;
+}
+.group-row {
+  display: flex; align-items: center; gap: var(--space-3);
+  min-height: 48px; padding: var(--space-3) var(--space-4);
+  position: relative;
+}
+.group-row + .group-row::before {
+  content: ""; position: absolute; top: 0; left: var(--space-4); right: 0;
+  border-top: 1px solid var(--separator);
+}
+.group-row.with-icon + .group-row.with-icon::before { left: calc(var(--space-4) + 20px + var(--space-3)); }
+button.group-row {
+  width: 100%; text-align: left; background: none; border: 0; color: inherit;
+  transition: background var(--dur-fast);
+}
+button.group-row:hover { background: var(--fill-hover); }
+button.group-row:active { background: var(--fill-pressed); }
+button.group-row:focus-visible { outline-offset: -2px; border-radius: 0; }
+.row-main { flex: 1; min-width: 0; }
+.row-title { font: var(--type-body); color: var(--label); }
+.row-subtitle { font: var(--type-callout); color: var(--label-2); margin-top: 2px; }
+.row-chevron { color: var(--label-3); }
+
+/* ---------- Status label (icon + text, never color alone) ---------- */
+.status { display: inline-flex; align-items: center; gap: var(--space-1); font: var(--type-callout); white-space: nowrap; }
+.status.ok { color: var(--ok); }
+.status.caution { color: var(--caution); }
+.status.danger { color: var(--danger); }
+
+/* ---------- Progress ---------- */
+.bar { height: 6px; border-radius: var(--radius-pill); background: var(--fill-selected); overflow: hidden; }
+.bar-fill { height: 100%; width: 0; border-radius: var(--radius-pill); background: var(--accent-fill); transition: width var(--dur-base) var(--ease); }
+.bar-fill.indeterminate { width: 30% !important; animation: indeterminate 1.3s var(--ease) infinite; }
+@keyframes indeterminate { from { margin-left: -30%; } to { margin-left: 100%; } }
+@media (prefers-reduced-motion: reduce) {
+  .bar-fill.indeterminate { width: 100% !important; margin-left: 0; opacity: .35; animation: none; }
+}
+
+/* ---------- Notice banner (in-interface feedback) ---------- */
+.notice {
+  display: flex; gap: var(--space-3); align-items: flex-start; max-width: var(--page-width);
+  margin: 0 0 var(--space-5); padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-group);
+  background: var(--danger-tint); border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent);
+}
+.notice > .icon { color: var(--danger); margin-top: 2px; }
+.notice.info { background: var(--caution-tint); border-color: color-mix(in srgb, var(--caution) 30%, transparent); }
+.notice.info > .icon { color: var(--caution); }
+.notice-body { flex: 1; min-width: 0; }
+.notice-title { font: var(--type-body-strong); }
+.notice-text { color: var(--label-2); margin-top: 2px; }
+.notice-details {
+  margin: var(--space-2) 0 0; padding: var(--space-2) var(--space-3); border-radius: var(--radius-control);
+  max-height: 150px; overflow: auto; background: var(--bg-sunken); color: var(--label-2);
+  font: var(--type-mono); white-space: pre-wrap; user-select: text;
+}
+.notice-actions { display: flex; align-items: center; gap: var(--space-1); flex-shrink: 0; }
+
+/* ---------- Toast (floating: glass) ---------- */
+.toast {
+  position: fixed; z-index: 5; bottom: var(--space-5); right: var(--space-5);
+  display: flex; align-items: center; gap: var(--space-2);
+  padding: var(--space-2) var(--space-4); min-height: 40px; border-radius: var(--radius-group);
+  background: var(--glass-fill); border: 1px solid var(--glass-border);
+  -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+  box-shadow: var(--shadow-float); color: var(--label);
+  animation: toast-in var(--dur-base) var(--ease);
+}
+.toast .icon { color: var(--ok); }
+@keyframes toast-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* ---------- Dialog (floating: glass) ---------- */
+dialog.sheet {
+  width: min(400px, calc(100vw - 48px)); padding: var(--space-5);
+  border: 1px solid var(--glass-border); border-radius: var(--radius-large);
+  background: var(--glass-fill); color: var(--label);
+  -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+  box-shadow: var(--shadow-float);
+}
+dialog.sheet[open] { animation: sheet-in var(--dur-base) var(--ease); }
+dialog.sheet::backdrop { background: rgba(0, 0, 0, .28); }
+@keyframes sheet-in { from { opacity: 0; transform: scale(.97); } to { opacity: 1; transform: none; } }
+.sheet-title { font: var(--type-headline); }
+.sheet-text { color: var(--label-2); margin-top: var(--space-2); }
+.sheet-actions { display: flex; justify-content: flex-end; gap: var(--space-2); margin-top: var(--space-5); }
+.btn-destructive { background: var(--danger); border-color: transparent; color: #ffffff; }
+.btn-destructive:hover:not(:disabled) { background: color-mix(in srgb, var(--danger), #000 10%); }
+
+@media (forced-colors: active) {
+  .btn, .field, .select select, .segmented button.active, .switch-track, .group, .notice, .toast, dialog.sheet { border: 1px solid CanvasText; }
+  .segmented button.active { background: Highlight; color: HighlightText; }
+  .switch input:checked + .switch-track { background: Highlight; }
+}

@@ -16,8 +16,13 @@ const state = {
 };
 
 /* ---------- Navigation ---------- */
+const PAGES = ["play", "versions", "notes", "settings", "logs"];
 function showPage(name) {
-  document.querySelectorAll(".nav-item").forEach((b) => b.classList.toggle("active", b.dataset.page === name));
+  document.querySelectorAll(".nav-item").forEach((b) => {
+    const on = b.dataset.page === name;
+    b.classList.toggle("active", on);
+    if (on) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+  });
   document.querySelectorAll(".page").forEach((p) => p.classList.toggle("active", p.id === `page-${name}`));
   if (name === "logs") renderLog();
   if (name === "notes") loadNotes();
@@ -30,10 +35,32 @@ $("change-name").onclick = $("player-chip").onclick;
 document.querySelectorAll("[data-href]").forEach((b) => (b.onclick = () => openLink(b.dataset.href)));
 function openLink(url) { invoke("open_link", { url }).catch(showError); }
 
+/* ---------- Keyboard shortcuts ----------
+ * Ctrl+1…5 sections, Ctrl+, Settings, F5 re-checks status (instead of reloading the page). */
+document.addEventListener("keydown", (e) => {
+  if (e.ctrlKey && !e.altKey && !e.shiftKey) {
+    const n = Number(e.key);
+    if (n >= 1 && n <= PAGES.length) { e.preventDefault(); showPage(PAGES[n - 1]); return; }
+    if (e.key === ",") { e.preventDefault(); showPage("settings"); return; }
+  }
+  if (e.key === "F5") { e.preventDefault(); refresh(); }
+});
+
+/* ---------- Window material ----------
+ * The window uses Mica on Windows 11 (tauri.conf.json). Windows 10 has no Mica, so the page keeps
+ * its opaque background there. Windows 11 reports platformVersion 13 or higher. */
+(async () => {
+  try {
+    if (!tauri || !navigator.userAgentData) return;
+    const { platform, platformVersion } = await navigator.userAgentData.getHighEntropyValues(["platformVersion"]);
+    if (platform === "Windows" && parseInt(platformVersion, 10) >= 13) document.documentElement.classList.add("mica");
+  } catch {}
+})();
+
 /* ---------- Toast ---------- */
 let toastTimer;
 function toast(text) {
-  $("toast").textContent = text;
+  $("toast-text").textContent = text;
   $("toast").classList.remove("hidden");
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => $("toast").classList.add("hidden"), 2400);
@@ -50,10 +77,13 @@ function showError(err, retry, { info = false } = {}) {
   const n = $("notice");
   n.classList.remove("hidden");
   n.classList.toggle("info", info);
+  n.setAttribute("role", info ? "status" : "alert");
+  n.querySelector(".icon use").setAttribute("href", info ? "#i-info" : "#i-alert");
   $("notice-title").textContent = e.title;
   $("notice-text").textContent = e.message;
   $("notice-details").textContent = e.details || "";
   $("notice-details").classList.add("hidden");
+  $("notice-toggle").setAttribute("aria-expanded", "false");
   $("notice-toggle").classList.toggle("hidden", !e.details);
   $("notice-copy").classList.toggle("hidden", !e.details);
   $("notice-retry").classList.toggle("hidden", !retry);
@@ -62,7 +92,10 @@ function showError(err, retry, { info = false } = {}) {
 }
 function hideError() { $("notice").classList.add("hidden"); }
 $("notice-close").onclick = hideError;
-$("notice-toggle").onclick = () => $("notice-details").classList.toggle("hidden");
+$("notice-toggle").onclick = () => {
+  const open = $("notice-details").classList.toggle("hidden") === false;
+  $("notice-toggle").setAttribute("aria-expanded", String(open));
+};
 $("notice-copy").onclick = async () => {
   const e = state.lastError;
   if (!e) return;

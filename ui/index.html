@@ -5,37 +5,50 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Yukkit Launcher</title>
   <link rel="icon" href="img/yukkit.svg" />
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/sidebar.css" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="sky" aria-hidden="true">
-    <div class="glow g1"></div>
-    <div class="glow g2"></div>
-    <div class="glow g3"></div>
-    <svg class="ribbons" viewBox="0 0 1200 800" preserveAspectRatio="none">
-      <path d="M-50 620 C 250 420, 520 760, 820 520 S 1150 300, 1260 360" />
-      <path d="M-50 660 C 260 470, 540 800, 840 560 S 1160 350, 1260 410" />
-      <path d="M-50 700 C 270 520, 560 840, 860 600 S 1170 400, 1260 460" />
-    </svg>
-  </div>
+  <!-- Icon set: 16 pt grid, 1.5 pt stroke, round caps. One visual language for every symbol. -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-play" viewBox="0 0 16 16"><path d="M5 3.25v9.5L12.5 8z"/></symbol>
+    <symbol id="i-stack" viewBox="0 0 16 16"><path d="M8 1.75 14.25 5 8 8.25 1.75 5z"/><path d="M1.75 8 8 11.25 14.25 8"/><path d="M1.75 11 8 14.25 14.25 11"/></symbol>
+    <symbol id="i-doc" viewBox="0 0 16 16"><path d="M3.75 1.75h5.5l3 3v9.5h-8.5z"/><path d="M9 1.75v3.25h3.25"/><path d="M6 8h4M6 10.75h4"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 16 16"><path d="M1.75 4.5h7M12.25 4.5h2M1.75 11.5h2M7.25 11.5h7"/><circle cx="10.5" cy="4.5" r="1.75"/><circle cx="5.5" cy="11.5" r="1.75"/></symbol>
+    <symbol id="i-terminal" viewBox="0 0 16 16"><rect x="1.75" y="2.5" width="12.5" height="11" rx="2"/><path d="m4.75 6.25 2 1.75-2 1.75M8.5 10.25h2.75"/></symbol>
+    <symbol id="i-check-circle" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.25"/><path d="m5.25 8.25 1.75 1.75 3.75-4"/></symbol>
+    <symbol id="i-down-circle" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.25"/><path d="M8 4.75v6M5.5 8.5 8 11l2.5-2.5"/></symbol>
+    <symbol id="i-x" viewBox="0 0 16 16"><path d="m4.25 4.25 7.5 7.5M11.75 4.25l-7.5 7.5"/></symbol>
+    <symbol id="i-chevron-updown" viewBox="0 0 16 16"><path d="M5.25 6.25 8 3.5l2.75 2.75M5.25 9.75 8 12.5l2.75-2.75"/></symbol>
+    <symbol id="i-chevron-right" viewBox="0 0 16 16"><path d="M6 3.5 10.5 8 6 12.5"/></symbol>
+    <symbol id="i-arrow-up-right" viewBox="0 0 16 16"><path d="M4.5 11.5l7-7M6 4.5h5.5V10"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 16 16"><path d="M8 2.25 14.5 13.5h-13z"/><path d="M8 6.5v3.25M8 11.6v.01"/></symbol>
+    <symbol id="i-info" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.25"/><path d="M8 7.25v4M8 4.9v.01"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 16 16"><rect x="5.5" y="5.5" width="8.75" height="8.75" rx="1.5"/><path d="M10.5 3.25v-1.5H1.75v8.75h1.5"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 16 16"><path d="M1.75 3.75h4.5l1.5 1.75h6.5v7.75H1.75z"/></symbol>
+    <symbol id="i-retry" viewBox="0 0 16 16"><path d="M13.25 8a5.25 5.25 0 1 1-1.6-3.77"/><path d="M13.25 2.5v3h-3"/></symbol>
+  </svg>
 
-  <aside class="sidebar">
+  <aside class="sidebar" aria-label="Sections">
     <div class="brand">
       <img src="img/yukkit.svg" alt="" />
       <span>Yukkit</span>
     </div>
 
     <nav class="nav">
-      <button class="nav-item active" data-page="play">Play</button>
-      <button class="nav-item" data-page="versions">Versions</button>
-      <button class="nav-item" data-page="notes">Patch notes</button>
-      <button class="nav-item" data-page="settings">Settings</button>
-      <button class="nav-item" data-page="logs">Logs</button>
+      <button class="nav-item active" data-page="play" aria-current="page" title="Play (Ctrl+1)"><svg class="icon"><use href="#i-play"/></svg>Play</button>
+      <button class="nav-item" data-page="versions" title="Versions (Ctrl+2)"><svg class="icon"><use href="#i-stack"/></svg>Versions</button>
+      <button class="nav-item" data-page="notes" title="Patch notes (Ctrl+3)"><svg class="icon"><use href="#i-doc"/></svg>Patch notes</button>
+      <button class="nav-item" data-page="settings" title="Settings (Ctrl+,)"><svg class="icon"><use href="#i-sliders"/></svg>Settings</button>
+      <button class="nav-item" data-page="logs" title="Logs (Ctrl+5)"><svg class="icon"><use href="#i-terminal"/></svg>Logs</button>
     </nav>
 
     <div class="sidebar-foot">
       <button class="player" id="player-chip" title="Change your name in Settings">
-        <span class="avatar" id="player-avatar">P</span>
+        <span class="avatar" id="player-avatar" aria-hidden="true">P</span>
         <span class="player-text">
           <span class="player-name" id="player-name">Player</span>
           <span class="player-mode">Offline account</span>
@@ -52,7 +65,8 @@
   </aside>
 
   <main class="content">
-    <div class="notice hidden" id="notice">
+    <div class="notice hidden" id="notice" role="alert">
+      <svg class="icon lg" aria-hidden="true"><use href="#i-alert"/></svg>
       <div class="notice-body">
         <div class="notice-title" id="notice-title"></div>
         <div class="notice-text" id="notice-text"></div>
@@ -60,9 +74,9 @@
       </div>
       <div class="notice-actions">
         <button class="btn btn-small" id="notice-retry">Try again</button>
-        <button class="btn btn-small btn-quiet" id="notice-toggle">Details</button>
+        <button class="btn btn-small btn-quiet" id="notice-toggle" aria-expanded="false" aria-controls="notice-details">Details</button>
         <button class="btn btn-small btn-quiet" id="notice-copy">Copy</button>
-        <button class="icon-btn" id="notice-close" title="Dismiss">✕</button>
+        <button class="icon-btn" id="notice-close" title="Dismiss" aria-label="Dismiss"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button>
       </div>
     </div>
 
@@ -166,7 +180,7 @@
             <div class="setting-name">Install new Yukkit Toolkit builds automatically</div>
             <div class="setting-desc">When you press Play, the newest build is downloaded first.</div>
           </div>
-          <label class="switch"><input type="checkbox" id="s-auto" /><span></span></label>
+          <label class="switch"><input type="checkbox" role="switch" id="s-auto" /><span class="switch-track" aria-hidden="true"></span></label>
         </div>
 
         <div class="setting">
@@ -268,7 +282,7 @@
     </section>
   </main>
 
-  <div class="toast hidden" id="toast"></div>
+  <div class="toast hidden" id="toast" role="status" aria-live="polite"><svg class="icon" aria-hidden="true"><use href="#i-check-circle"/></svg><span id="toast-text"></span></div>
   <script src="app.js"></script>
 </body>
 </html>

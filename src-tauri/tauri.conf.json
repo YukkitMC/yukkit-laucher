@@ -17,7 +17,12 @@
         "minWidth": 960,
         "minHeight": 620,
         "center": true,
-        "resizable": true
+        "resizable": true,
+        "transparent": true,
+        "windowEffects": {
+          "effects": ["mica"]
+        },
+        "zoomHotkeysEnabled": true
       }
     ],
     "security": {
