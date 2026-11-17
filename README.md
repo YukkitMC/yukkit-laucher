@@ -121,7 +121,9 @@ npm run build    # installer in src-tauri/target/release/bundle/nsis/
 The interface is plain HTML, CSS and JavaScript in [`ui/`](ui), with no bundler. If you open `ui/index.html` in a browser, it shows a preview with sample data, which is handy for working on the design.
 
 ```text
-ui/                     the interface (index.html, styles.css, app.js)
+ui/                     the interface (index.html, app.js)
+  css/tokens.css        design tokens: colors (light and dark), type, spacing
+  css/*.css             shared controls, then one stylesheet per screen
 versions.json           versions the launcher offers
 src-tauri/src/
   main.rs               commands the interface calls

@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="css/versions.css" />
   <link rel="stylesheet" href="css/notes.css" />
   <link rel="stylesheet" href="css/settings.css" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="css/logs.css" />
 </head>
 <body>
   <!-- Icon set: 16 pt grid, 1.5 pt stroke, round caps. One visual language for every symbol. -->
@@ -294,18 +294,18 @@
     </section>
 
     <!-- LOGS -->
-    <section class="page" id="page-logs">
-      <div class="title-row">
+    <section class="page" id="page-logs" aria-labelledby="logs-title">
+      <header class="page-header">
         <div>
-          <h2 class="title">Logs</h2>
-          <p class="subtitle">What the launcher and the game are doing. Handy when asking for help.</p>
+          <h1 class="page-title" id="logs-title">Logs</h1>
+          <p class="page-subtitle">What the launcher and the game are doing. Handy when asking for help.</p>
         </div>
-        <div class="btn-group">
-          <button class="btn btn-small" id="log-copy">Copy</button>
+        <div class="btn-group" role="toolbar" aria-label="Log actions">
+          <button class="btn btn-small" id="log-copy"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>Copy</button>
           <button class="btn btn-small btn-quiet" id="log-clear">Clear</button>
         </div>
-      </div>
-      <pre class="log" id="log"></pre>
+      </header>
+      <pre class="log" id="log" tabindex="0" aria-label="Log output"></pre>
     </section>
   </main>
 

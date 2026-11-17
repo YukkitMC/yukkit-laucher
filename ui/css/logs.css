@@ -1,0 +1,11 @@
+/* Logs: the page fills the window; the log is the content, the header is its toolbar. */
+
+#page-logs.active { display: flex; flex-direction: column; height: 100%; max-width: none; }
+#page-logs .page-header { flex-shrink: 0; }
+.log {
+  flex: 1; min-height: 160px; margin: 0; overflow: auto;
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-sunken); border: 1px solid var(--separator); border-radius: var(--radius-group);
+  font: var(--type-mono); color: var(--label); white-space: pre-wrap; user-select: text;
+}
+.log:focus-visible { outline-offset: -2px; }
