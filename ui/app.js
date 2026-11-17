@@ -426,15 +426,35 @@ async function loadNotes(quiet) {
 
 /* ---------- Settings (auto-save) ---------- */
 function setSeg(id, value) {
-  $(id).querySelectorAll("button").forEach((b) => b.classList.toggle("active", b.dataset.value === value));
+  $(id).querySelectorAll("button").forEach((b) => {
+    const on = b.dataset.value === value;
+    b.classList.toggle("active", on);
+    b.setAttribute("aria-checked", String(on));
+    b.tabIndex = on ? 0 : -1; // roving tabindex: one stop per group, arrows move inside it
+  });
 }
+// Radio-group keyboard behavior for segmented controls: arrow keys choose the neighbor.
+document.querySelectorAll(".segmented[role=radiogroup]").forEach((group) => {
+  group.addEventListener("keydown", (e) => {
+    const keys = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 };
+    if (!(e.key in keys)) return;
+    e.preventDefault();
+    const items = [...group.querySelectorAll("button")];
+    const i = items.indexOf(document.activeElement);
+    const next = items[(i + keys[e.key] + items.length) % items.length];
+    next.focus();
+    next.click();
+  });
+});
 function segValue(id) {
   const active = $(id).querySelector("button.active");
   return active ? active.dataset.value : null;
 }
 function memLabel() {
   const mb = Number($("s-memory").value);
-  $("s-memory-label").textContent = `· ${(mb / 1024).toFixed(mb % 1024 ? 1 : 0)} GB`;
+  const text = `${(mb / 1024).toFixed(mb % 1024 ? 1 : 0)} GB`;
+  $("s-memory-label").textContent = text;
+  $("s-memory").setAttribute("aria-valuetext", text);
 }
 
 async function loadSettings() {

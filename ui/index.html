@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="css/play.css" />
   <link rel="stylesheet" href="css/versions.css" />
   <link rel="stylesheet" href="css/notes.css" />
+  <link rel="stylesheet" href="css/settings.css" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -182,110 +183,114 @@
     </section>
 
     <!-- SETTINGS -->
-    <section class="page" id="page-settings">
-      <h2 class="title">Settings</h2>
-      <p class="subtitle">Your name, updates, memory and where things are kept. Changes save on their own.</p>
-
-      <div class="settings">
-        <div class="setting">
-          <span class="num">01</span>
-          <div class="setting-text">
-            <div class="setting-name">Player name</div>
-            <div class="setting-desc">What other players see. 3–16 letters, numbers or underscores.</div>
-          </div>
-          <input class="field" id="s-username" maxlength="16" spellcheck="false" />
+    <section class="page" id="page-settings" aria-labelledby="settings-title">
+      <header class="page-header">
+        <div>
+          <h1 class="page-title" id="settings-title">Settings</h1>
+          <p class="page-subtitle">Changes save on their own.</p>
         </div>
+      </header>
 
-        <div class="setting">
-          <span class="num">02</span>
-          <div class="setting-text">
-            <div class="setting-name">Install new Yukkit Toolkit builds automatically</div>
-            <div class="setting-desc">When you press Play, the newest build is downloaded first.</div>
+      <h2 class="section-header section-title settings-group-title">Account</h2>
+      <div class="group">
+        <div class="group-row setting">
+          <div class="row-main">
+            <label class="row-title" for="s-username">Player name</label>
+            <p class="row-subtitle" id="s-username-desc">What other players see. 3–16 letters, numbers or underscores.</p>
           </div>
-          <label class="switch"><input type="checkbox" role="switch" id="s-auto" /><span class="switch-track" aria-hidden="true"></span></label>
+          <input class="field" id="s-username" maxlength="16" spellcheck="false" aria-describedby="s-username-desc" />
         </div>
+      </div>
 
-        <div class="setting">
-          <span class="num">03</span>
-          <div class="setting-text">
-            <div class="setting-name">Updates</div>
-            <div class="setting-desc">Stable: normal releases.<br />Preview: also builds marked as pre-release. Newer, but can break.</div>
+      <h2 class="section-header section-title settings-group-title">Updates</h2>
+      <div class="group">
+        <div class="group-row setting">
+          <div class="row-main">
+            <label class="row-title" for="s-auto">Install new Yukkit Toolkit builds automatically</label>
+            <p class="row-subtitle" id="s-auto-desc">When you press Play, the newest build is downloaded first.</p>
           </div>
-          <div class="segmented" id="s-channel">
-            <button data-value="stable">Stable</button>
-            <button data-value="preview">Preview</button>
-          </div>
+          <label class="switch"><input type="checkbox" role="switch" id="s-auto" aria-describedby="s-auto-desc" /><span class="switch-track" aria-hidden="true"></span></label>
         </div>
-
-        <div class="setting">
-          <span class="num">04</span>
-          <div class="setting-text">
-            <div class="setting-name">Memory <span class="muted" id="s-memory-label"></span></div>
-            <div class="setting-desc">4 GB suits most computers. More isn't always faster.</div>
+        <div class="group-row setting">
+          <div class="row-main">
+            <div class="row-title" id="s-channel-label">Release channel</div>
+            <p class="row-subtitle" id="s-channel-desc">Stable gets normal releases. Preview also gets pre-release builds: newer, but they can break.</p>
           </div>
-          <input type="range" id="s-memory" min="1024" max="16384" step="512" />
-        </div>
-
-        <div class="setting">
-          <span class="num">05</span>
-          <div class="setting-text">
-            <div class="setting-name">Java</div>
-            <div class="setting-desc">Automatic downloads the right Java for each version.</div>
-            <div class="inline-input hidden" id="s-java-row">
-              <input class="field wide" id="s-java" placeholder="C:\Program Files\Java\jdk-25\bin\javaw.exe" spellcheck="false" />
-              <button class="btn btn-small" id="s-java-browse">Browse</button>
-            </div>
-          </div>
-          <div class="segmented" id="s-java-mode">
-            <button data-value="auto">Automatic</button>
-            <button data-value="custom">My own</button>
-          </div>
-        </div>
-
-        <div class="setting">
-          <span class="num">06</span>
-          <div class="setting-text">
-            <div class="setting-name">Install location</div>
-            <div class="setting-desc path" id="s-install"></div>
-          </div>
-          <div class="btn-group">
-            <button class="btn btn-small" id="s-install-browse">Change</button>
-            <button class="btn btn-small btn-quiet" id="s-install-reset">Default</button>
-            <button class="btn btn-small btn-quiet" id="s-install-open">Open</button>
-          </div>
-        </div>
-
-        <div class="setting">
-          <span class="num">07</span>
-          <div class="setting-text">
-            <div class="setting-name">Java arguments</div>
-            <div class="setting-desc">Passed to Java as they are. Applies the next time the game starts.</div>
-          </div>
-          <input class="field mono" id="s-jvm" placeholder="For example -XX:+UseZGC" spellcheck="false" />
-        </div>
-
-        <div class="setting">
-          <span class="num">08</span>
-          <div class="setting-text">
-            <div class="setting-name">Game arguments</div>
-            <div class="setting-desc">Extra arguments for Minecraft itself.</div>
-          </div>
-          <input class="field mono" id="s-game" placeholder="For example --width 1600" spellcheck="false" />
-        </div>
-
-        <div class="setting">
-          <span class="num">09</span>
-          <div class="setting-text">
-            <div class="setting-name">While you play</div>
-            <div class="setting-desc">What the launcher does once the game window opens.</div>
-          </div>
-          <div class="segmented" id="s-keep">
-            <button data-value="open">Stay open</button>
-            <button data-value="min">Minimize</button>
+          <div class="segmented" id="s-channel" role="radiogroup" aria-labelledby="s-channel-label" aria-describedby="s-channel-desc">
+            <button role="radio" data-value="stable">Stable</button>
+            <button role="radio" data-value="preview">Preview</button>
           </div>
         </div>
       </div>
-      <p class="form-error" id="s-error"></p>
+
+      <h2 class="section-header section-title settings-group-title">Game</h2>
+      <div class="group">
+        <div class="group-row setting">
+          <div class="row-main">
+            <label class="row-title" for="s-memory">Memory <span class="setting-value" id="s-memory-label"></span></label>
+            <p class="row-subtitle" id="s-memory-desc">4 GB suits most computers. More isn't always faster.</p>
+          </div>
+          <input type="range" id="s-memory" min="1024" max="16384" step="512" aria-describedby="s-memory-desc" />
+        </div>
+        <div class="group-row setting">
+          <div class="row-main">
+            <div class="row-title" id="s-keep-label">While you play</div>
+            <p class="row-subtitle" id="s-keep-desc">What the launcher does once the game window opens.</p>
+          </div>
+          <div class="segmented" id="s-keep" role="radiogroup" aria-labelledby="s-keep-label" aria-describedby="s-keep-desc">
+            <button role="radio" data-value="open">Stay open</button>
+            <button role="radio" data-value="min">Minimize</button>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="section-header section-title settings-group-title">Storage</h2>
+      <div class="group">
+        <div class="group-row setting stack">
+          <div class="row-main">
+            <div class="row-title" id="s-install-label">Install location</div>
+            <p class="setting-path" id="s-install" aria-labelledby="s-install-label"></p>
+          </div>
+          <div class="btn-group" role="group" aria-labelledby="s-install-label">
+            <button class="btn btn-small" id="s-install-browse">Change…</button>
+            <button class="btn btn-small btn-quiet" id="s-install-reset">Use default</button>
+            <button class="btn btn-small btn-quiet" id="s-install-open"><svg class="icon" aria-hidden="true"><use href="#i-folder"/></svg>Open</button>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="section-header section-title settings-group-title">Advanced</h2>
+      <div class="group">
+        <div class="group-row setting stack">
+          <div class="row-main">
+            <div class="row-title" id="s-java-label">Java</div>
+            <p class="row-subtitle" id="s-java-desc">Automatic downloads the right Java for each version.</p>
+            <div class="inline-input hidden" id="s-java-row">
+              <input class="field wide mono" id="s-java" aria-label="Path to javaw.exe" placeholder="C:\Program Files\Java\jdk-25\bin\javaw.exe" spellcheck="false" />
+              <button class="btn btn-small" id="s-java-browse">Browse…</button>
+            </div>
+          </div>
+          <div class="segmented" id="s-java-mode" role="radiogroup" aria-labelledby="s-java-label" aria-describedby="s-java-desc">
+            <button role="radio" data-value="auto">Automatic</button>
+            <button role="radio" data-value="custom">My own</button>
+          </div>
+        </div>
+        <div class="group-row setting">
+          <div class="row-main">
+            <label class="row-title" for="s-jvm">Java arguments</label>
+            <p class="row-subtitle" id="s-jvm-desc">Passed to Java as they are. Applies the next time the game starts.</p>
+          </div>
+          <input class="field mono" id="s-jvm" placeholder="For example -XX:+UseZGC" spellcheck="false" aria-describedby="s-jvm-desc" />
+        </div>
+        <div class="group-row setting">
+          <div class="row-main">
+            <label class="row-title" for="s-game">Game arguments</label>
+            <p class="row-subtitle" id="s-game-desc">Extra arguments for Minecraft itself.</p>
+          </div>
+          <input class="field mono" id="s-game" placeholder="For example --width 1600" spellcheck="false" aria-describedby="s-game-desc" />
+        </div>
+      </div>
+      <p class="form-error" id="s-error" role="alert"></p>
     </section>
 
     <!-- LOGS -->

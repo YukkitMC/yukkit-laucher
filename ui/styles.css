@@ -14,18 +14,6 @@
 .subtitle { color: var(--muted); margin: 0 0 26px; }
 .title-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
 
-/* Settings */
-.settings { border-top: 1px solid var(--line); }
-.setting {
-  display: grid; grid-template-columns: 34px 1fr auto; gap: 18px; align-items: center;
-  padding: 16px 0; border-bottom: 1px solid var(--line);
-}
-.num { font: 12px var(--mono); color: var(--muted); }
-.setting-name { font-weight: 500; }
-.setting-desc { color: var(--muted); font-size: 13px; margin-top: 2px; }
-.setting-desc.path { font: 12px var(--mono); color: var(--soft); user-select: text; word-break: break-all; }
-.form-error { color: var(--bad); min-height: 20px; margin-top: 12px; }
-
 /* Logs */
 .log {
   margin: 0; height: calc(100vh - 200px); overflow: auto; padding: 14px;
