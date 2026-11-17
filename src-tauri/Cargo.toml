@@ -1,8 +1,10 @@
 [package]
 name = "yukkit-launcher"
-version = "0.1.0"
-description = "A desktop launcher that installs, updates and starts LiquidBounce"
+version = "0.2.0"
+description = "The Yukkit Launcher: installs, updates and starts Yukkit Toolkit for Minecraft"
 authors = ["YukkitMC"]
+license = "MIT"
+repository = "https://github.com/YukkitMC/yukkit-laucher"
 edition = "2021"
 rust-version = "1.77"
 

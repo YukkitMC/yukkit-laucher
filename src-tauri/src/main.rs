@@ -1,7 +1,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-mod api;
-mod download_page;
+mod catalog;
 mod errors;
 mod installer;
 mod java;
@@ -10,6 +9,7 @@ mod minecraft;
 mod net;
 mod progress;
 mod settings;
+mod sources;
 
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
@@ -48,119 +48,172 @@ impl Drop for BusyGuard<'_> {
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
-struct BuildView {
-    build_id: u32,
-    lb_version: String,
-    mc_version: String,
-    release: bool,
-    date: String,
-    message: String,
-    commit: String,
+struct InstalledView {
+    toolkit_tag: String,
+    fabric_api: String,
 }
 
-impl From<&api::Build> for BuildView {
-    fn from(b: &api::Build) -> Self {
-        let date = b.date.as_str().map(|d| d.chars().take(10).collect()).unwrap_or_default();
-        BuildView {
-            build_id: b.build_id,
-            lb_version: b.lb_version.clone(),
-            mc_version: b.mc_version.clone(),
-            release: b.release,
-            date,
-            message: b.message.lines().next().unwrap_or_default().to_string(),
-            commit: b.commit_id.chars().take(7).collect(),
-        }
-    }
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct VersionView {
+    id: String,
+    name: String,
+    minecraft: String,
+    channel: String,
+    description: String,
+    installed: Option<InstalledView>,
+    checks: installer::Checks,
 }
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct Overview {
-    latest: Option<BuildView>,
-    api_error: Option<UiError>,
-    installed: Option<BuildView>,
-    checks: installer::Checks,
+    versions: Vec<VersionView>,
+    selected: String,
+    latest: Option<sources::ToolkitRelease>,
     update_available: bool,
+    error: Option<UiError>,
     game_running: bool,
     username: String,
 }
 
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
-struct SettingsView {
-    settings: Settings,
-    install_dir: String,
-    default_install_dir: String,
-    version: String,
+/// The selected version, or the newest one when nothing (or something unknown) is selected.
+fn selected_id(settings: &Settings, versions: &[catalog::GameVersion]) -> String {
+    versions
+        .iter()
+        .find(|v| v.id == settings.selected_version)
+        .or_else(|| versions.first())
+        .map(|v| v.id.clone())
+        .unwrap_or_default()
+}
+
+async fn resolve_version(id: &str) -> Result<catalog::GameVersion, UiError> {
+    catalog::find(id).await.ok_or_else(|| {
+        UiError::new(
+            "That version isn't available",
+            "The version you picked is no longer offered. Choose another one on the Versions page.",
+        )
+    })
 }
 
 #[tauri::command]
 async fn get_overview(state: State<'_, AppState>) -> Result<Overview, UiError> {
     let settings = state.settings.lock().unwrap().clone();
-    let installed = installer::load_installed(&settings.install_dir());
+    let root = settings.install_dir();
+    let list = catalog::load().await;
+    let selected = selected_id(&settings, &list);
 
-    let latest = async {
-        let api = api::Api::connect(&settings.session_token).await?;
-        api.latest_build(settings.nightly).await
-    }
-    .await;
+    let views = list
+        .iter()
+        .map(|v| {
+            let installed = installer::load_installed(&root, &v.id);
+            VersionView {
+                id: v.id.clone(),
+                name: v.name.clone(),
+                minecraft: v.minecraft.clone(),
+                channel: v.channel.clone(),
+                description: v.description.clone(),
+                checks: installer::checks(installed.as_ref(), &settings),
+                installed: installed.map(|i| InstalledView { toolkit_tag: i.toolkit.tag, fabric_api: i.fabric_api }),
+            }
+        })
+        .collect::<Vec<_>>();
 
-    let (latest, api_error) = match latest {
-        Ok(b) => (Some(b), None),
-        Err(e) => (None, Some(UiError::from(e))),
+    let (latest, error) = match list.iter().find(|v| v.id == selected) {
+        Some(version) => match sources::latest_toolkit(version, settings.previews).await {
+            Ok(r) => (Some(r), None),
+            Err(e) => (None, Some(UiError::from(e))),
+        },
+        None => (None, None),
     };
-    let update_available = match (&latest, &installed) {
-        (Some(l), Some(i)) => l.build_id != i.build.build_id,
+    let update_available = match (&latest, installer::load_installed(&root, &selected)) {
+        (Some(l), Some(i)) => l.tag != i.toolkit.tag,
         _ => false,
     };
+
     Ok(Overview {
-        latest: latest.as_ref().map(BuildView::from),
-        api_error,
-        installed: installed.as_ref().map(|i| BuildView::from(&i.build)),
-        checks: installer::checks(installed.as_ref(), &settings),
+        versions: views,
+        selected,
+        latest,
         update_available,
+        error,
         game_running: state.running.load(Ordering::SeqCst),
         username: settings.username.clone(),
     })
 }
 
 #[tauri::command]
-async fn get_changelog(state: State<'_, AppState>, build_id: u32) -> Result<String, UiError> {
-    let token = state.settings.lock().unwrap().session_token.clone();
-    let api = api::Api::connect(&token).await?;
-    Ok(api.changelog(build_id).await?)
+async fn get_patch_notes(state: State<'_, AppState>) -> Result<Vec<sources::ToolkitRelease>, UiError> {
+    let settings = state.settings.lock().unwrap().clone();
+    let list = catalog::load().await;
+    let selected = selected_id(&settings, &list);
+    let repo = list
+        .iter()
+        .find(|v| v.id == selected)
+        .map(|v| v.toolkit_repo.clone())
+        .unwrap_or_else(|| "YukkitMC/yukkit-toolkit".into());
+    Ok(sources::toolkit_releases(&repo).await?)
 }
 
 #[tauri::command]
-async fn install(app: AppHandle, state: State<'_, AppState>) -> Result<(), UiError> {
-    let _guard = BusyGuard::acquire(&state.busy)?;
-    let settings = state.settings.lock().unwrap().clone();
-    settings.validate()?;
-    installer::install(&app, &settings).await?;
+fn select_version(state: State<'_, AppState>, version_id: String) -> Result<(), UiError> {
+    let mut settings = state.settings.lock().unwrap();
+    settings.selected_version = version_id;
+    settings.save()?;
     Ok(())
 }
 
 #[tauri::command]
-async fn play(app: AppHandle, state: State<'_, AppState>) -> Result<(), UiError> {
+async fn install(app: AppHandle, state: State<'_, AppState>, version_id: String) -> Result<(), UiError> {
+    let _guard = BusyGuard::acquire(&state.busy)?;
+    let settings = state.settings.lock().unwrap().clone();
+    settings.validate()?;
+    let version = resolve_version(&version_id).await?;
+    installer::install(&app, &settings, &version).await?;
+    Ok(())
+}
+
+#[tauri::command]
+async fn play(app: AppHandle, state: State<'_, AppState>, version_id: String) -> Result<(), UiError> {
     if state.running.load(Ordering::SeqCst) {
-        return Err(UiError::new("LiquidBounce is already running", "Close the game window first if you want to start it again."));
+        return Err(UiError::new(
+            "Minecraft is already running",
+            "Close the game window first if you want to start it again.",
+        ));
     }
     let _guard = BusyGuard::acquire(&state.busy)?;
     let settings = state.settings.lock().unwrap().clone();
     settings.validate()?;
+    let root = settings.install_dir();
 
-    let installed = match installer::install(&app, &settings).await {
-        Ok(installed) => installed,
-        Err(err) if is_network(&err) => match installer::load_installed(&settings.install_dir()) {
-            Some(installed) => {
-                progress::log(&app, &format!("Offline — starting the installed version instead ({:#})", err));
-                installed
-            }
-            None => return Err(err.into()),
+    let installed = match resolve_version(&version_id).await {
+        Ok(version) => match installer::install(&app, &settings, &version).await {
+            Ok(installed) => installed,
+            Err(err) if is_network(&err) => match installer::load_installed(&root, &version_id) {
+                Some(installed) => {
+                    progress::log(&app, &format!("Offline — starting the installed version instead ({:#})", err));
+                    installed
+                }
+                None => return Err(err.into()),
+            },
+            Err(err) => return Err(err.into()),
         },
-        Err(err) => return Err(err.into()),
+        Err(err) => match installer::load_installed(&root, &version_id) {
+            Some(installed) => installed,
+            None => return Err(err),
+        },
     };
     launch::launch(&app, &installed, &settings, state.running.clone()).await?;
+    Ok(())
+}
+
+#[tauri::command]
+fn remove_version(state: State<'_, AppState>, version_id: String) -> Result<(), UiError> {
+    if state.busy.load(Ordering::SeqCst) || state.running.load(Ordering::SeqCst) {
+        return Err(UiError::new("Not right now", "Wait until the game is closed and nothing is installing, then try again."));
+    }
+    let root = state.settings.lock().unwrap().install_dir();
+    installer::uninstall(&root, &version_id)?;
     Ok(())
 }
 
@@ -178,7 +231,6 @@ fn get_settings(state: State<'_, AppState>) -> SettingsView {
 #[tauri::command]
 fn save_settings(state: State<'_, AppState>, mut settings: Settings) -> Result<(), UiError> {
     let mut current = state.settings.lock().unwrap();
-    settings.session_token = current.session_token.clone();
     settings.username = settings.username.trim().to_string();
     settings.validate()?;
     settings.save()?;
@@ -234,9 +286,11 @@ fn main() {
         })
         .invoke_handler(tauri::generate_handler![
             get_overview,
-            get_changelog,
+            get_patch_notes,
+            select_version,
             install,
             play,
+            remove_version,
             get_settings,
             save_settings,
             pick_folder,

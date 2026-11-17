@@ -26,7 +26,7 @@ pub struct Reporter {
 
 impl Reporter {
     pub fn new(app: AppHandle) -> Self {
-        Self { app, last: Arc::new(Mutex::new(Instant::now() - Duration::from_secs(1))) }
+        Self { app, last: Arc::new(Mutex::new(Instant::now())) }
     }
 
     /// Always delivered: use for step changes.
@@ -40,7 +40,7 @@ impl Reporter {
     pub fn update(&self, step: u8, title: &str, detail: impl Into<String>, fraction: Option<f64>) {
         {
             let mut last = self.last.lock().unwrap();
-            if last.elapsed() < Duration::from_millis(80) && fraction.map_or(true, |f| f < 1.0) {
+            if last.elapsed() < Duration::from_millis(80) && fraction.map_or(true, |f| f > 0.0 && f < 1.0) {
                 return;
             }
             *last = Instant::now();

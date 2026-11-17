@@ -10,6 +10,8 @@ use crate::errors::friendly;
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(default, rename_all = "camelCase")]
 pub struct Settings {
+    /// The game version picked on the Play page (an id from versions.json).
+    pub selected_version: String,
     /// Empty means "use the default location".
     pub install_dir: String,
     /// Offline player name shown in game.
@@ -20,25 +22,29 @@ pub struct Settings {
     pub java_path: String,
     /// Extra JVM arguments, separated by spaces.
     pub jvm_args: String,
-    /// Use nightly (development) builds instead of releases.
-    pub nightly: bool,
+    /// Extra game arguments, separated by spaces.
+    pub game_args: String,
+    /// Also offer Yukkit Toolkit builds marked as pre-release.
+    pub previews: bool,
+    /// Install new Yukkit Toolkit builds when pressing Play.
+    pub auto_update: bool,
     /// Keep the launcher window open while playing (otherwise it's minimized).
     pub keep_open: bool,
-    /// Random id sent to the LiquidBounce API, like the official launcher does.
-    pub session_token: String,
 }
 
 impl Default for Settings {
     fn default() -> Self {
         Self {
+            selected_version: String::new(),
             install_dir: String::new(),
             username: "Player".into(),
             memory_mb: 4096,
             java_path: String::new(),
             jvm_args: String::new(),
-            nightly: false,
+            game_args: String::new(),
+            previews: false,
+            auto_update: true,
             keep_open: true,
-            session_token: uuid::Uuid::new_v4().simple().to_string(),
         }
     }
 }
@@ -67,15 +73,10 @@ impl Settings {
     }
 
     pub fn load() -> Settings {
-        let mut settings = std::fs::read_to_string(config_path())
+        std::fs::read_to_string(config_path())
             .ok()
             .and_then(|text| serde_json::from_str::<Settings>(&text).ok())
-            .unwrap_or_default();
-        if settings.session_token.is_empty() {
-            settings.session_token = uuid::Uuid::new_v4().simple().to_string();
-        }
-        let _ = settings.save();
-        settings
+            .unwrap_or_default()
     }
 
     pub fn save(&self) -> Result<()> {
@@ -106,7 +107,7 @@ impl Settings {
         if !dir.is_empty() && !Path::new(dir).is_absolute() {
             return Err(friendly(
                 "Check the install location",
-                "The install location must be a full folder path, like C:\\Games\\LiquidBounce. Use Browse to pick one.",
+                "The install location must be a full folder path, like C:\\Games\\Yukkit. Use Browse to pick one.",
             ));
         }
         let java = self.java_path.trim();

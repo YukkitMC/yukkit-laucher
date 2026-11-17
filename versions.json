@@ -1,0 +1,16 @@
+{
+  "$comment": "Versions the Yukkit Launcher offers. The launcher reads this file from the main branch on GitHub, so a new Minecraft version can be added here without shipping a new launcher. A copy is built into the launcher for when GitHub can't be reached.",
+  "versions": [
+    {
+      "id": "26.3",
+      "name": "Yukkit Toolkit for 26.3",
+      "minecraft": "26.3",
+      "fabricLoader": "0.20.1",
+      "java": 25,
+      "channel": "alpha",
+      "description": "Fabric build with 139 modules, the Right Shift module window, minimap, Freecam and team tools.",
+      "toolkitRepo": "YukkitMC/yukkit-toolkit",
+      "toolkitMatch": "26.3"
+    }
+  ]
+}

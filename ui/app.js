@@ -6,13 +6,13 @@ const listen = tauri ? tauri.event.listen : async () => {};
 const $ = (id) => document.getElementById(id);
 const state = {
   overview: null,
+  notes: null,
   busy: false,
   running: false,
-  lastError: null,
-  lastAction: null,
   settings: null,
   defaultInstallDir: "",
   log: [],
+  lastError: null,
 };
 
 /* ---------- Navigation ---------- */
@@ -20,193 +20,227 @@ function showPage(name) {
   document.querySelectorAll(".nav-item").forEach((b) => b.classList.toggle("active", b.dataset.page === name));
   document.querySelectorAll(".page").forEach((p) => p.classList.toggle("active", p.id === `page-${name}`));
   if (name === "logs") renderLog();
+  if (name === "notes") loadNotes();
+  $("notice").classList.toggle("on-other-page", name !== "play");
 }
 document.querySelectorAll(".nav-item").forEach((b) => b.addEventListener("click", () => showPage(b.dataset.page)));
-$("player-chip").addEventListener("click", () => showPage("settings"));
-document.querySelectorAll("[data-href]").forEach((b) =>
-  b.addEventListener("click", () => invoke("open_link", { url: b.dataset.href }).catch(showError))
-);
+document.querySelectorAll("[data-goto]").forEach((b) => b.addEventListener("click", () => showPage(b.dataset.goto)));
+$("player-chip").onclick = () => { showPage("settings"); $("s-username").focus(); };
+$("change-name").onclick = $("player-chip").onclick;
+document.querySelectorAll("[data-href]").forEach((b) => (b.onclick = () => openLink(b.dataset.href)));
+function openLink(url) { invoke("open_link", { url }).catch(showError); }
 
 /* ---------- Toast ---------- */
 let toastTimer;
 function toast(text) {
-  const t = $("toast");
-  t.textContent = text;
-  t.classList.remove("hidden");
+  $("toast").textContent = text;
+  $("toast").classList.remove("hidden");
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.add("hidden"), 2600);
+  toastTimer = setTimeout(() => $("toast").classList.add("hidden"), 2400);
 }
 
-/* ---------- Errors ---------- */
+/* ---------- Notices (plain-English errors) ---------- */
 function normalizeError(err) {
   if (err && typeof err === "object" && err.title) return err;
   return { title: "Something went wrong", message: String(err), details: String(err) };
 }
-function showError(err, retry) {
+function showError(err, retry, { info = false } = {}) {
   const e = normalizeError(err);
   state.lastError = e;
-  $("error-card").classList.remove("hidden", "info");
-  $("error-title").textContent = e.title;
-  $("error-message").textContent = e.message;
-  $("error-details").textContent = e.details || "No extra details.";
-  $("error-details").classList.add("hidden");
-  $("error-toggle").textContent = "Show details";
-  $("error-toggle").classList.toggle("hidden", !e.details);
-  $("error-copy").classList.toggle("hidden", !e.details);
-  $("error-retry").classList.toggle("hidden", !retry);
-  $("error-retry").onclick = () => { hideError(); retry && retry(); };
-  appendLog(`[error] ${e.title}: ${e.message}${e.details ? "\n        " + e.details : ""}`);
-  showPage("home");
+  const n = $("notice");
+  n.classList.remove("hidden");
+  n.classList.toggle("info", info);
+  $("notice-title").textContent = e.title;
+  $("notice-text").textContent = e.message;
+  $("notice-details").textContent = e.details || "";
+  $("notice-details").classList.add("hidden");
+  $("notice-toggle").classList.toggle("hidden", !e.details);
+  $("notice-copy").classList.toggle("hidden", !e.details);
+  $("notice-retry").classList.toggle("hidden", !retry);
+  $("notice-retry").onclick = () => { hideError(); retry && retry(); };
+  if (!info) appendLog(`[problem] ${e.title}: ${e.message}${e.details ? "\n          " + e.details : ""}`);
 }
-function hideError() { $("error-card").classList.add("hidden"); }
-$("error-dismiss").onclick = hideError;
-$("error-toggle").onclick = () => {
-  const d = $("error-details");
-  d.classList.toggle("hidden");
-  $("error-toggle").textContent = d.classList.contains("hidden") ? "Show details" : "Hide details";
-};
-$("error-copy").onclick = async () => {
+function hideError() { $("notice").classList.add("hidden"); }
+$("notice-close").onclick = hideError;
+$("notice-toggle").onclick = () => $("notice-details").classList.toggle("hidden");
+$("notice-copy").onclick = async () => {
   const e = state.lastError;
   if (!e) return;
   await navigator.clipboard.writeText(`${e.title}\n${e.message}\n\n${e.details}`).catch(() => {});
-  toast("Details copied");
+  toast("Copied");
 };
 
-/* ---------- Home ---------- */
-function setCheck(id, ok, installed) {
-  const li = $(id);
-  li.classList.toggle("ok", ok);
-  li.classList.toggle("missing", !ok);
-  li.querySelector("em").textContent = ok ? "Ready" : installed ? "Needs repair" : "Will be installed";
+/* ---------- Play page ---------- */
+function selectedVersion() {
+  const o = state.overview;
+  return o && o.versions.find((v) => v.id === o.selected);
 }
 
-function renderOverview() {
+function setRow(id, ready, text) {
+  const row = $(id);
+  row.querySelector(".row-text").textContent = text;
+  const s = row.querySelector(".row-state");
+  s.className = "row-state " + (ready ? "ok" : "todo");
+  s.textContent = ready ? "Ready" : "Will be installed";
+}
+
+function renderPlay() {
   const o = state.overview;
   if (!o) return;
-  const build = o.latest || o.installed;
-
+  const v = selectedVersion();
   $("player-name").textContent = o.username;
+  $("playing-as-name").textContent = o.username;
   $("player-avatar").textContent = (o.username || "P")[0].toUpperCase();
 
-  if (build) {
-    $("hero-title").textContent = `LiquidBounce ${build.lbVersion || ""}`.trim();
-    const chips = [
-      `<span class="chip accent">Minecraft ${escapeHtml(build.mcVersion)}</span>`,
-      `<span class="chip">${build.release ? "Release" : "Nightly"}</span>`,
-    ];
-    if (build.date) chips.push(`<span class="chip">${escapeHtml(formatDate(build.date))}</span>`);
-    if (o.updateAvailable) chips.push(`<span class="chip warn">Update available</span>`);
-    if (!o.latest && o.installed) chips.push(`<span class="chip warn">Offline</span>`);
-    $("hero-chips").innerHTML = chips.join("");
-    $("hero-message").textContent = build.message || "";
+  // Version picker
+  const sel = $("version-select");
+  sel.innerHTML = o.versions
+    .map((x) => `<option value="${esc(x.id)}">${esc(x.minecraft)}${x.channel ? " · " + esc(x.channel) : ""}</option>`)
+    .join("");
+  sel.value = o.selected;
+  sel.disabled = state.busy;
+
+  if (!v) {
+    $("play-eyebrow").textContent = "No versions available";
+    $("play-lede").textContent = "The launcher couldn't find any game versions to offer.";
+    renderButton();
+    return;
+  }
+
+  const ready = v.installed && v.checks.java && v.checks.minecraft && v.checks.toolkit;
+  const status = !v.installed
+    ? `<span class="warn">Not installed yet</span>`
+    : !ready
+      ? `<span class="warn">Needs repair</span>`
+      : o.updateAvailable
+        ? `<span class="warn">Update available</span>`
+        : `<span class="ok">Ready to play</span>`;
+  $("play-eyebrow").innerHTML = `Minecraft ${esc(v.minecraft)} · ${status}`;
+
+  const tag = v.installed ? v.installed.toolkitTag : o.latest ? o.latest.tag : "";
+  $("play-lede").textContent = `${tag ? tag + " · " : ""}${v.description || "Yukkit Toolkit on Fabric."}`;
+
+  const upd = $("update-line");
+  if (o.updateAvailable && o.latest) {
+    upd.classList.remove("hidden");
+    $("update-text").textContent = `${o.latest.tag} is out. It installs when you press Play.`;
   } else {
-    $("hero-title").textContent = "LiquidBounce";
-    $("hero-chips").innerHTML = "";
-    $("hero-message").textContent = "Free and open-source Minecraft client.";
+    upd.classList.add("hidden");
   }
 
-  const installed = !!o.installed;
-  setCheck("check-java", o.checks.java, installed);
-  setCheck("check-minecraft", o.checks.minecraft, installed);
-  setCheck("check-client", o.checks.client, installed);
-  const allOk = o.checks.java && o.checks.minecraft && o.checks.client;
-  $("setup-note").textContent = allOk
-    ? "Everything is installed. Updates are downloaded automatically when you press Play."
-    : "Anything missing is downloaded automatically when you press the button above.";
+  setRow("row-java", v.checks.java, v.checks.java ? "Installed and ready." : "Downloaded for you the first time you play.");
+  setRow("row-minecraft", v.checks.minecraft,
+    v.checks.minecraft ? `Minecraft ${v.minecraft} with the Fabric mod loader.` : `Minecraft ${v.minecraft} and Fabric, about 600 MB the first time.`);
+  setRow("row-toolkit", v.checks.toolkit,
+    v.checks.toolkit ? `${v.installed.toolkitTag} with Fabric API ${v.installed.fabricApi}.` : o.latest ? `${o.latest.tag} from GitHub.` : "The newest build from GitHub.");
 
-  renderAction();
-
-  if (o.apiError && !o.installed) {
-    showError(o.apiError, refresh);
-  } else if (o.apiError) {
-    const card = $("error-card");
-    showError({ ...o.apiError, message: o.apiError.message + " You can still play the version you already have." }, refresh);
-    card.classList.add("info");
-  }
+  renderButton();
 }
 
-function renderAction() {
+function renderButton() {
   const o = state.overview;
-  const btn = $("main-action");
-  const label = $("main-action-label");
-  const hint = $("action-hint");
-  btn.classList.remove("playing");
-
+  const v = selectedVersion();
+  const btn = $("play-btn");
+  btn.classList.remove("running");
   if (state.running) {
     btn.disabled = true;
-    btn.classList.add("playing");
-    label.textContent = "Playing";
-    hint.textContent = "LiquidBounce is running. Close the game to play again.";
+    btn.classList.add("running");
+    $("play-label").textContent = "Playing";
+    $("play-sub").textContent = "Close the game to play again";
     return;
   }
   if (state.busy) {
     btn.disabled = true;
-    label.textContent = state.lastAction === "install" ? "Installing…" : "Starting…";
-    hint.textContent = "You can keep using your computer while this runs.";
+    $("play-label").textContent = "Preparing…";
+    $("play-sub").textContent = "This can take a few minutes";
     return;
   }
-  btn.disabled = !o;
-  if (!o) { label.textContent = "Please wait"; hint.textContent = ""; return; }
+  btn.disabled = !v;
+  if (!v) { $("play-label").textContent = "Play"; $("play-sub").textContent = "Nothing to play yet"; return; }
+  const ready = v.installed && v.checks.java && v.checks.minecraft && v.checks.toolkit;
+  $("play-label").textContent = `PLAY ${v.minecraft}`;
+  $("play-sub").textContent = !v.installed
+    ? "Installs first, about 600 MB"
+    : !ready ? "Repairs missing files first"
+    : o.updateAvailable ? "Updates first" : "Ready to launch";
+}
 
-  const complete = o.installed && o.checks.java && o.checks.minecraft && o.checks.client;
-  if (!o.installed) {
-    label.textContent = "Install & Play";
-    hint.textContent = o.latest ? "First install downloads about 600 MB. Only needed once." : "Connect to the internet to install.";
-  } else if (o.updateAvailable) {
-    label.textContent = "Update & Play";
-    hint.textContent = `A new LiquidBounce build is ready (you have ${o.installed.lbVersion || "an older build"}).`;
-  } else if (!complete) {
-    label.textContent = "Repair & Play";
-    hint.textContent = "Some files are missing. They'll be downloaded again.";
-  } else {
-    label.textContent = "Play";
-    hint.textContent = `Signed in offline as ${o.username}.`;
+function renderNews() {
+  const o = state.overview;
+  const box = $("news");
+  const list = (state.notes || []).slice(0, 3);
+  if (!list.length) {
+    box.innerHTML = `<div class="news-empty">${o && o.error ? "News shows up here when you're online." : "Loading news…"}</div>`;
+    return;
   }
+  const arts = [
+    "radial-gradient(120% 140% at 0% 0%, #2b86ff 0%, #13235a 55%, #0b0c10 100%)",
+    "radial-gradient(120% 140% at 100% 0%, #7a6bff 0%, #221a55 55%, #0b0c10 100%)",
+    "radial-gradient(120% 140% at 50% 100%, #3fc1ff 0%, #0f3350 55%, #0b0c10 100%)",
+  ];
+  box.innerHTML = list
+    .map((r, i) => `
+      <button class="news-card" data-i="${i}">
+        <div class="news-art" style="--art:${arts[i % arts.length]}"><span>${esc(r.tag)}</span></div>
+        <div class="news-body">
+          <div class="news-title">${esc(shortTitle(r.title))}</div>
+          <div class="news-meta">${esc(formatDate(r.date))}${r.prerelease ? " · preview" : ""}</div>
+          <div class="news-text">${esc(firstLine(r.notes))}</div>
+        </div>
+      </button>`)
+    .join("");
+  box.querySelectorAll(".news-card").forEach((c) => (c.onclick = () => showPage("notes")));
 }
 
 async function refresh() {
-  hideError();
   try {
     state.overview = await invoke("get_overview");
     state.running = state.overview.gameRunning;
-    renderOverview();
-    const build = state.overview.latest;
-    if (build) loadChangelog(build.buildId);
-    else $("changelog").innerHTML = '<span class="muted">The changelog will appear when you\'re online.</span>';
+    renderPlay();
+    renderVersions();
+    const o = state.overview;
+    const v = selectedVersion();
+    if (o.error) {
+      showError(
+        v && v.installed ? { ...o.error, message: o.error.message + " You can still play the version you have." } : o.error,
+        refresh,
+        { info: !!(v && v.installed) }
+      );
+    }
+    loadNotes(true);
   } catch (e) {
     showError(e, refresh);
   }
 }
 
-async function loadChangelog(id) {
+$("version-select").onchange = async (e) => {
+  const id = e.target.value;
   try {
-    const text = await invoke("get_changelog", { buildId: id });
-    $("changelog").textContent = (text || "").trim() || "No changelog for this build.";
-  } catch {
-    $("changelog").innerHTML = '<span class="muted">Changelog unavailable right now.</span>';
-  }
-}
+    await invoke("select_version", { versionId: id });
+    state.notes = null;
+    await refresh();
+  } catch (err) { showError(err); }
+};
 
-async function runMain() {
-  state.lastAction = "play";
+async function play() {
+  const v = selectedVersion();
+  if (!v) return;
   state.busy = true;
   hideError();
   setProgress({ step: 1, steps: 6, title: "Getting ready", detail: "", fraction: null });
-  renderAction();
+  renderPlay();
   try {
-    await invoke("play");
-    toast("Starting Minecraft — the game window will open shortly");
-    $("progress").classList.add("hidden");
+    await invoke("play", { versionId: v.id });
+    toast("Starting Minecraft. The game window opens in a moment.");
   } catch (e) {
-    $("progress").classList.add("hidden");
-    showError(e, runMain);
+    showError(e, play);
   } finally {
+    $("progress").classList.add("hidden");
     state.busy = false;
-    renderAction();
     refresh();
   }
 }
-$("main-action").addEventListener("click", runMain);
+$("play-btn").onclick = play;
 
 function setProgress(p) {
   $("progress").classList.remove("hidden");
@@ -218,83 +252,203 @@ function setProgress(p) {
     fill.classList.add("indeterminate");
   } else {
     fill.classList.remove("indeterminate");
-    const overall = ((p.step - 1) + Math.min(1, Math.max(0, p.fraction))) / p.steps;
+    const overall = (p.step - 1 + Math.min(1, Math.max(0, p.fraction))) / p.steps;
     fill.style.width = `${Math.round(overall * 100)}%`;
   }
 }
 
-/* ---------- Settings ---------- */
-let javaMode = "auto";
-function setJavaMode(mode) {
-  javaMode = mode;
-  document.querySelectorAll("[data-java]").forEach((b) => b.classList.toggle("active", b.dataset.java === mode));
-  $("s-java-row").classList.toggle("hidden", mode !== "custom");
-}
-document.querySelectorAll("[data-java]").forEach((b) => b.addEventListener("click", () => setJavaMode(b.dataset.java)));
+/* ---------- Versions page ---------- */
+function renderVersions() {
+  const o = state.overview;
+  const list = $("version-list");
+  if (!o || !o.versions.length) { list.innerHTML = `<p class="muted" style="padding:16px 0">No versions yet.</p>`; return; }
+  list.innerHTML = o.versions
+    .map((v) => {
+      const inUse = v.id === o.selected;
+      const badges = [
+        v.channel ? `<span class="badge amber">${esc(v.channel)}</span>` : "",
+        v.installed ? `<span class="badge">Installed</span>` : "",
+        inUse ? `<span class="badge blue">Selected</span>` : "",
+      ].join("");
+      const meta = [
+        `Minecraft ${esc(v.minecraft)}`,
+        "Fabric",
+        v.installed ? `Toolkit ${esc(v.installed.toolkitTag)}` : "Not installed",
+      ].join(" · ");
+      const actions = [
+        inUse ? `<span class="in-use">In use</span>` : `<button class="btn btn-small" data-use="${esc(v.id)}">Use this version</button>`,
+        v.installed
+          ? `<button class="btn btn-small btn-quiet btn-danger" data-remove="${esc(v.id)}">Remove</button>`
+          : `<button class="btn btn-small btn-primary" data-install="${esc(v.id)}">Install</button>`,
+      ].join("");
+      return `
+        <div class="item">
+          <div class="item-main">
+            <div class="item-title">${esc(v.name)} ${badges}</div>
+            <div class="item-meta">${meta}</div>
+            ${v.description ? `<div class="item-desc">${esc(v.description)}</div>` : ""}
+          </div>
+          <div class="item-actions">${actions}</div>
+        </div>`;
+    })
+    .join("");
 
+  list.querySelectorAll("[data-use]").forEach((b) => (b.onclick = async () => {
+    await invoke("select_version", { versionId: b.dataset.use }).catch(showError);
+    state.notes = null;
+    await refresh();
+    toast(`Switched to ${b.dataset.use}`);
+  }));
+  list.querySelectorAll("[data-install]").forEach((b) => (b.onclick = () => installVersion(b.dataset.install)));
+  list.querySelectorAll("[data-remove]").forEach((b) => (b.onclick = async () => {
+    if (!confirm(`Remove ${b.dataset.remove}? Your worlds and settings for it are kept.`)) return;
+    try {
+      await invoke("remove_version", { versionId: b.dataset.remove });
+      toast("Removed. Your worlds are still there.");
+      refresh();
+    } catch (e) { showError(e); }
+  }));
+}
+
+async function installVersion(id) {
+  if (state.busy) return;
+  await invoke("select_version", { versionId: id }).catch(() => {});
+  showPage("play");
+  state.busy = true;
+  hideError();
+  await refresh();
+  setProgress({ step: 1, steps: 6, title: "Getting ready", detail: "", fraction: null });
+  renderButton();
+  try {
+    await invoke("install", { versionId: id });
+    toast("Installed. Press Play when you're ready.");
+  } catch (e) {
+    showError(e, () => installVersion(id));
+  } finally {
+    $("progress").classList.add("hidden");
+    state.busy = false;
+    refresh();
+  }
+}
+
+/* ---------- Patch notes ---------- */
+async function loadNotes(quiet) {
+  if (!state.notes) {
+    try {
+      state.notes = await invoke("get_patch_notes");
+    } catch (e) {
+      if (!quiet) $("notes").innerHTML = `<p class="muted">Patch notes need an internet connection. ${esc(normalizeError(e).message)}</p>`;
+      renderNews();
+      return;
+    }
+  }
+  renderNews();
+  const box = $("notes");
+  if (!state.notes.length) { box.innerHTML = `<p class="muted">No releases yet.</p>`; return; }
+  box.innerHTML = state.notes
+    .map((r, i) => `
+      <article class="release">
+        <div class="release-head">
+          <h3>${esc(shortTitle(r.title))}</h3>
+          <span class="muted">${esc(r.tag)} · ${esc(formatDate(r.date))}</span>
+        </div>
+        <div class="md">${markdown(r.notes)}</div>
+        <button class="link" data-release="${i}">Open on GitHub ↗</button>
+      </article>`)
+    .join("");
+  box.querySelectorAll("[data-release]").forEach((b) => (b.onclick = () => openLink(state.notes[b.dataset.release].url)));
+}
+
+/* ---------- Settings (auto-save) ---------- */
+function setSeg(id, value) {
+  $(id).querySelectorAll("button").forEach((b) => b.classList.toggle("active", b.dataset.value === value));
+}
+function segValue(id) {
+  const active = $(id).querySelector("button.active");
+  return active ? active.dataset.value : null;
+}
 function memLabel() {
   const mb = Number($("s-memory").value);
-  $("s-memory-label").textContent = `${(mb / 1024).toFixed(mb % 1024 ? 1 : 0)} GB`;
+  $("s-memory-label").textContent = `· ${(mb / 1024).toFixed(mb % 1024 ? 1 : 0)} GB`;
 }
-$("s-memory").addEventListener("input", memLabel);
 
 async function loadSettings() {
   const view = await invoke("get_settings");
   const s = view.settings;
   state.settings = s;
   state.defaultInstallDir = view.defaultInstallDir;
+  $("launcher-version").textContent = `Launcher ${view.version}`;
   $("s-username").value = s.username;
-  $("s-install").value = view.installDir;
+  $("s-auto").checked = s.autoUpdate;
+  setSeg("s-channel", s.previews ? "preview" : "stable");
   $("s-memory").value = s.memoryMb;
   memLabel();
+  setSeg("s-java-mode", s.javaPath ? "custom" : "auto");
   $("s-java").value = s.javaPath;
-  setJavaMode(s.javaPath ? "custom" : "auto");
+  $("s-java-row").classList.toggle("hidden", !s.javaPath);
+  $("s-install").textContent = view.installDir;
   $("s-jvm").value = s.jvmArgs;
-  $("s-nightly").checked = s.nightly;
-  $("s-keep").checked = s.keepOpen;
-  $("about-line").textContent = `Yukkit Launcher ${view.version} · A community launcher for LiquidBounce. LiquidBounce is made by CCBlueX.`;
+  $("s-game").value = s.gameArgs;
+  setSeg("s-keep", s.keepOpen ? "open" : "min");
 }
 
-$("s-install-browse").onclick = async () => {
-  const dir = await invoke("pick_folder").catch(showError);
-  if (dir) $("s-install").value = dir;
-};
-$("s-install-reset").onclick = () => { $("s-install").value = state.defaultInstallDir; };
-$("s-install-open").onclick = () => invoke("open_install_folder").catch(showError);
-$("s-java-browse").onclick = async () => {
-  const file = await invoke("pick_java").catch(showError);
-  if (file) $("s-java").value = file;
-};
-
-$("s-save").onclick = async () => {
+async function saveSettings(patch, quietToast) {
   $("s-error").textContent = "";
-  const install = $("s-install").value.trim();
-  const settings = {
-    ...state.settings,
-    username: $("s-username").value.trim(),
-    installDir: install === state.defaultInstallDir ? "" : install,
-    memoryMb: Number($("s-memory").value),
-    javaPath: javaMode === "custom" ? $("s-java").value.trim() : "",
-    jvmArgs: $("s-jvm").value.trim(),
-    nightly: $("s-nightly").checked,
-    keepOpen: $("s-keep").checked,
-  };
+  const next = { ...state.settings, ...patch };
   try {
-    await invoke("save_settings", { settings });
-    state.settings = settings;
-    $("s-saved").classList.remove("hidden");
-    setTimeout(() => $("s-saved").classList.add("hidden"), 2000);
-    refresh();
+    await invoke("save_settings", { settings: next });
+    state.settings = next;
+    if (!quietToast) toast("Saved");
+    if ("username" in patch || "previews" in patch || "installDir" in patch || "javaPath" in patch) refresh();
+    return true;
   } catch (e) {
     const err = normalizeError(e);
     $("s-error").textContent = `${err.title}. ${err.message}`;
+    return false;
   }
+}
+
+$("s-username").onchange = (e) => saveSettings({ username: e.target.value.trim() });
+$("s-auto").onchange = (e) => saveSettings({ autoUpdate: e.target.checked });
+$("s-memory").oninput = memLabel;
+$("s-memory").onchange = (e) => saveSettings({ memoryMb: Number(e.target.value) });
+$("s-jvm").onchange = (e) => saveSettings({ jvmArgs: e.target.value.trim() });
+$("s-game").onchange = (e) => saveSettings({ gameArgs: e.target.value.trim() });
+$("s-java").onchange = (e) => saveSettings({ javaPath: e.target.value.trim() });
+
+$("s-channel").querySelectorAll("button").forEach((b) => (b.onclick = () => {
+  setSeg("s-channel", b.dataset.value);
+  state.notes = null;
+  saveSettings({ previews: b.dataset.value === "preview" });
+}));
+$("s-keep").querySelectorAll("button").forEach((b) => (b.onclick = () => {
+  setSeg("s-keep", b.dataset.value);
+  saveSettings({ keepOpen: b.dataset.value === "open" });
+}));
+$("s-java-mode").querySelectorAll("button").forEach((b) => (b.onclick = () => {
+  setSeg("s-java-mode", b.dataset.value);
+  const custom = b.dataset.value === "custom";
+  $("s-java-row").classList.toggle("hidden", !custom);
+  if (!custom) saveSettings({ javaPath: "" });
+  else $("s-java").focus();
+}));
+$("s-java-browse").onclick = async () => {
+  const file = await invoke("pick_java").catch(showError);
+  if (file) { $("s-java").value = file; saveSettings({ javaPath: file }); }
 };
+$("s-install-browse").onclick = async () => {
+  const dir = await invoke("pick_folder").catch(showError);
+  if (dir && (await saveSettings({ installDir: dir }))) $("s-install").textContent = dir;
+};
+$("s-install-reset").onclick = async () => {
+  if (await saveSettings({ installDir: "" })) $("s-install").textContent = state.defaultInstallDir;
+};
+$("s-install-open").onclick = () => invoke("open_install_folder").catch(showError);
 
 /* ---------- Logs ---------- */
 function appendLog(line) {
   state.log.push(line);
-  if (state.log.length > 4000) state.log.splice(0, state.log.length - 4000);
+  if (state.log.length > 5000) state.log.splice(0, state.log.length - 5000);
   if ($("page-logs").classList.contains("active")) {
     const el = $("log");
     const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 30;
@@ -304,13 +458,10 @@ function appendLog(line) {
 }
 function renderLog() {
   const el = $("log");
-  el.textContent = state.log.join("\n") + (state.log.length ? "\n" : "");
+  el.textContent = state.log.length ? state.log.join("\n") + "\n" : "Nothing here yet. Press Play and the launcher's steps and the game's output show up here.";
   el.scrollTop = el.scrollHeight;
 }
-$("log-copy").onclick = async () => {
-  await navigator.clipboard.writeText(state.log.join("\n")).catch(() => {});
-  toast("Log copied");
-};
+$("log-copy").onclick = async () => { await navigator.clipboard.writeText(state.log.join("\n")).catch(() => {}); toast("Log copied"); };
 $("log-clear").onclick = () => { state.log = []; renderLog(); };
 
 /* ---------- Events from Rust ---------- */
@@ -319,33 +470,83 @@ listen("launcher-log", (e) => appendLog(`[launcher] ${e.payload}`));
 listen("game-log", (e) => appendLog(e.payload));
 listen("game-state", (e) => {
   state.running = e.payload.running;
-  renderAction();
+  renderButton();
   const code = e.payload.code;
-  if (!e.payload.running && code !== null && code !== undefined && code !== 0) {
-    showError({
-      title: "Minecraft closed unexpectedly",
-      message: `The game stopped with an error (code ${code}). Try lowering or raising the memory in Settings, or check the Logs page for what happened right before it closed.`,
-      details: state.log.slice(-30).join("\n"),
-    }, runMain);
+  if (!e.payload.running) {
+    refresh();
+    if (code !== null && code !== undefined && code !== 0) {
+      showError({
+        title: "Minecraft closed unexpectedly",
+        message: `The game stopped with an error (code ${code}). Try changing the memory in Settings, or look at the Logs page to see what happened right before it closed.`,
+        details: state.log.slice(-40).join("\n"),
+      }, play);
+      showPage("play");
+    }
   }
 });
 
 /* ---------- Helpers ---------- */
-function escapeHtml(s) {
+function esc(s) {
   return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 function formatDate(iso) {
-  const d = new Date(iso);
+  if (!iso) return "";
+  const d = new Date(iso + "T12:00:00");
   return isNaN(d) ? iso : d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
 }
+function shortTitle(t) { return String(t || "").replace(/\s*·\s*Minecraft.*$/, ""); }
+function firstLine(md) {
+  const lines = String(md || "").split("\n").map((l) => l.trim()).filter((l) => l && !l.startsWith("#"));
+  const bullet = lines.find((l) => /^[-*] /.test(l)) || lines[0] || "";
+  return bullet.replace(/^[-*] /, "").replace(/\*\*|`/g, "");
+}
+/** Small, safe Markdown subset for release notes: headings, bullets, paragraphs, bold, code. */
+function markdown(src) {
+  const inline = (t) => esc(t)
+    .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+  const out = [];
+  let list = false;
+  for (const raw of String(src || "").split(/\r?\n/)) {
+    const line = raw.trim();
+    const bullet = line.match(/^[-*] (.*)/);
+    if (bullet) {
+      if (!list) { out.push("<ul>"); list = true; }
+      out.push(`<li>${inline(bullet[1])}</li>`);
+      continue;
+    }
+    if (list) { out.push("</ul>"); list = false; }
+    const h = line.match(/^(#{1,4}) (.*)/);
+    if (h) out.push(`<h${h[1].length === 1 ? 1 : h[1].length === 4 ? 4 : 2}>${inline(h[2])}</h${h[1].length === 1 ? 1 : h[1].length === 4 ? 4 : 2}>`);
+    else if (line) out.push(`<p>${inline(line)}</p>`);
+  }
+  if (list) out.push("</ul>");
+  return out.join("");
+}
 
-/* Browser preview without Tauri (for designing the UI). */
+/* Browser preview without Tauri, for working on the design. */
 async function mockInvoke(cmd) {
-  const build = { buildId: 1, lbVersion: "0.30.0", mcVersion: "1.21.4", release: true, date: "2026-11-01", message: "Preview mode — open the app with Tauri to see real data.", commit: "abc1234" };
+  const notes = [
+    { tag: "v0.2.0-alpha.4", title: "Yukkit Toolkit v0.2.0-alpha.4 · Minecraft 26.3", date: "2026-11-13", prerelease: false, url: "#",
+      notes: "# Yukkit Toolkit v0.2.0-alpha.4\n\n**Alpha build, not fully tested in-game.** Back up your worlds.\n\n## What's new\n- Black and blue theme for the module window.\n- Fix: typed search text was invisible.\n- 139 modules across Combat, Movement, Player, World and more." },
+    { tag: "v0.2.0-alpha.3", title: "Yukkit Toolkit v0.2.0-alpha.3 · Minecraft 26.3", date: "2026-11-13", prerelease: false, url: "#",
+      notes: "## What's new\n- Module window restyled and enlarged; search moved to the title bar.\n- Fix: legacy toggles could not be disabled." },
+    { tag: "v0.2.0-alpha.2", title: "Yukkit Toolkit v0.2.0-alpha.2 · Minecraft 26.3", date: "2026-11-13", prerelease: false, url: "#",
+      notes: "## What's new\n- New Right Shift window with search and a Teams tab.\n- PlayerESP module with team colours." },
+  ];
   switch (cmd) {
-    case "get_overview": return { latest: build, apiError: null, installed: null, checks: { java: false, minecraft: false, client: false }, updateAvailable: false, gameRunning: false, username: "Player" };
-    case "get_changelog": return "• New modules\n• Bug fixes\n• Performance improvements";
-    case "get_settings": return { settings: { installDir: "", username: "Player", memoryMb: 4096, javaPath: "", jvmArgs: "", nightly: false, keepOpen: true, sessionToken: "" }, installDir: "C:\\Users\\you\\AppData\\Roaming\\YukkitLauncher", defaultInstallDir: "C:\\Users\\you\\AppData\\Roaming\\YukkitLauncher", version: "preview" };
+    case "get_overview":
+      return {
+        versions: [{ id: "26.3", name: "Yukkit Toolkit for 26.3", minecraft: "26.3", channel: "alpha",
+          description: "Fabric build with 139 modules, the Right Shift module window, minimap, Freecam and team tools.",
+          installed: null, checks: { java: false, minecraft: false, toolkit: false } }],
+        selected: "26.3", latest: notes[0], updateAvailable: false, error: null, gameRunning: false, username: "Steve",
+      };
+    case "get_patch_notes": return notes;
+    case "get_settings":
+      return { settings: { selectedVersion: "26.3", installDir: "", username: "Steve", memoryMb: 4096, javaPath: "", jvmArgs: "", gameArgs: "", previews: false, autoUpdate: true, keepOpen: true },
+        installDir: "C:\\Users\\you\\AppData\\Roaming\\YukkitLauncher", defaultInstallDir: "C:\\Users\\you\\AppData\\Roaming\\YukkitLauncher", version: "0.2.0" };
     default: return null;
   }
 }

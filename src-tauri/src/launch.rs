@@ -1,4 +1,4 @@
-//! Starts Minecraft with LiquidBounce and streams its output to the Logs page.
+//! Starts Minecraft with Yukkit Toolkit and streams its output to the Logs page.
 
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -79,7 +79,7 @@ pub async fn launch(app: &AppHandle, installed: &Installed, settings: &Settings,
         ("user_properties", "{}".into()),
         ("version_type", plan.version_type.clone()),
         ("natives_directory", plan.natives_dir.to_string_lossy().into_owned()),
-        ("launcher_name", "YukkitLauncher".into()),
+        ("launcher_name", "yukkit-launcher".into()),
         ("launcher_version", env!("CARGO_PKG_VERSION").into()),
         ("classpath", classpath),
         ("classpath_separator", separator.into()),
@@ -96,7 +96,6 @@ pub async fn launch(app: &AppHandle, installed: &Installed, settings: &Settings,
     let mut args: Vec<String> = vec![
         format!("-Xmx{}M", settings.memory_mb),
         format!("-Xms{}M", settings.memory_mb.min(1024)),
-        format!("-Dnet.ccbluex.liquidbounce.api.token={}", settings.session_token),
     ];
     args.extend(settings.jvm_args.split_whitespace().map(String::from));
     let jvm = expand_args(&plan.jvm_args);
@@ -116,9 +115,18 @@ pub async fn launch(app: &AppHandle, installed: &Installed, settings: &Settings,
     } else {
         args.extend(game.iter().map(|a| fill(a)));
     }
+    args.extend(settings.game_args.split_whitespace().map(String::from));
 
     tokio::fs::create_dir_all(&plan.game_dir).await?;
-    log(app, &format!("Starting LiquidBounce {} with Java at {}", installed.build.lb_version, java.display()));
+    log(
+        app,
+        &format!(
+            "Starting Minecraft {} with Yukkit Toolkit {} (Java at {})",
+            installed.minecraft,
+            installed.toolkit.tag,
+            java.display()
+        ),
+    );
 
     let mut command = Command::new(&java);
     command
