@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Yukkit Launcher</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="img/icon.png" alt="" class="brand-icon" />
+      <div>
+        <div class="brand-name">LiquidBounce</div>
+        <div class="brand-sub">Launcher</div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <button class="nav-item active" data-page="home">
+        <svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
+        <span>Home</span>
+      </button>
+      <button class="nav-item" data-page="settings">
+        <svg viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm8.4-2.1 1.6 1.3-2 3.4-2-.7a7.6 7.6 0 0 1-1.8 1l-.3 2.1h-3.9l-.3-2.1a7.6 7.6 0 0 1-1.8-1l-2 .7-2-3.4 1.6-1.3a7.8 7.8 0 0 1 0-2.1L2 10.6l2-3.4 2 .7a7.6 7.6 0 0 1 1.8-1L8.1 4.8h3.9l.3 2.1a7.6 7.6 0 0 1 1.8 1l2-.7 2 3.4-1.6 1.3a7.8 7.8 0 0 1 0 2.1Z"/></svg>
+        <span>Settings</span>
+      </button>
+      <button class="nav-item" data-page="logs">
+        <svg viewBox="0 0 24 24"><path d="M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm2 4v2h10V8Zm0 4v2h10v-2Zm0 4v2h6v-2Z"/></svg>
+        <span>Logs</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="player" id="player-chip" title="Change your name in Settings">
+        <div class="player-avatar" id="player-avatar">P</div>
+        <div>
+          <div class="player-name" id="player-name">Player</div>
+          <div class="player-mode">Offline account</div>
+        </div>
+      </div>
+      <div class="links">
+        <button class="link" data-href="https://liquidbounce.net">liquidbounce.net</button>
+        <button class="link" data-href="https://github.com/YukkitMC/yukkit-laucher">GitHub</button>
+      </div>
+      <div class="disclaimer">Community launcher · not affiliated with CCBlueX</div>
+    </div>
+  </aside>
+
+  <main class="content">
+    <!-- HOME -->
+    <section class="page active" id="page-home">
+      <div class="hero">
+        <div class="hero-art"></div>
+        <div class="hero-body">
+          <img src="img/logo.svg" class="wordmark" alt="LiquidBounce" />
+          <h1 id="hero-title">Loading…</h1>
+          <div class="chips" id="hero-chips"></div>
+          <p class="hero-message" id="hero-message">&nbsp;</p>
+
+          <div class="action-row">
+            <button class="btn btn-primary btn-big" id="main-action" disabled>
+              <span id="main-action-label">Please wait</span>
+            </button>
+            <div class="action-hint" id="action-hint"></div>
+          </div>
+
+          <div class="progress hidden" id="progress">
+            <div class="progress-head">
+              <span id="progress-title">Preparing</span>
+              <span id="progress-step"></span>
+            </div>
+            <div class="bar"><div class="bar-fill" id="progress-fill"></div></div>
+            <div class="progress-detail" id="progress-detail"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notice hidden" id="error-card">
+        <div class="notice-icon">!</div>
+        <div class="notice-body">
+          <div class="notice-title" id="error-title"></div>
+          <div class="notice-text" id="error-message"></div>
+          <div class="notice-actions">
+            <button class="btn btn-small btn-primary" id="error-retry">Try again</button>
+            <button class="btn btn-small btn-ghost" id="error-toggle">Show details</button>
+            <button class="btn btn-small btn-ghost" id="error-copy">Copy details</button>
+            <button class="btn btn-small btn-ghost" id="error-dismiss">Dismiss</button>
+          </div>
+          <pre class="details hidden" id="error-details"></pre>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <div class="card-title">Your setup</div>
+          <ul class="checks">
+            <li id="check-java"><span class="dot"></span><div><b>Java</b><small>Runs Minecraft</small></div><em></em></li>
+            <li id="check-minecraft"><span class="dot"></span><div><b>Minecraft</b><small>Game files &amp; Fabric</small></div><em></em></li>
+            <li id="check-client"><span class="dot"></span><div><b>LiquidBounce</b><small>The client itself</small></div><em></em></li>
+          </ul>
+          <p class="muted small" id="setup-note">Everything missing is downloaded automatically when you press the button above.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">What's new</div>
+          <div class="changelog" id="changelog"><span class="muted">Loading changelog…</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="page" id="page-settings">
+      <header class="page-head">
+        <h2>Settings</h2>
+        <p class="muted">Most players never need to change these.</p>
+      </header>
+
+      <div class="card form">
+        <div class="field">
+          <label for="s-username">Player name</label>
+          <input id="s-username" maxlength="16" spellcheck="false" />
+          <small>3–16 letters, numbers or underscores. Used for offline play.</small>
+        </div>
+
+        <div class="field">
+          <label>Install location</label>
+          <div class="input-row">
+            <input id="s-install" readonly />
+            <button class="btn btn-ghost" id="s-install-browse">Browse</button>
+            <button class="btn btn-ghost" id="s-install-reset">Default</button>
+            <button class="btn btn-ghost" id="s-install-open">Open</button>
+          </div>
+          <small>Where Java, Minecraft and LiquidBounce are stored (about 1 GB).</small>
+        </div>
+
+        <div class="field">
+          <label for="s-memory">Memory for Minecraft: <b id="s-memory-label"></b></label>
+          <input type="range" id="s-memory" min="1024" max="16384" step="512" />
+          <small>4 GB is right for most computers. More isn't always faster.</small>
+        </div>
+
+        <div class="field">
+          <label>Java</label>
+          <div class="segmented">
+            <button data-java="auto" class="seg active">Automatic</button>
+            <button data-java="custom" class="seg">Use my own</button>
+          </div>
+          <div class="input-row hidden" id="s-java-row">
+            <input id="s-java" placeholder="C:\Program Files\Java\bin\javaw.exe" spellcheck="false" />
+            <button class="btn btn-ghost" id="s-java-browse">Browse</button>
+          </div>
+          <small>Automatic downloads the right Java version for you.</small>
+        </div>
+
+        <details class="advanced">
+          <summary>Advanced launch options</summary>
+          <div class="field">
+            <label for="s-jvm">Extra Java arguments</label>
+            <input id="s-jvm" placeholder="-XX:+UseG1GC" spellcheck="false" />
+          </div>
+          <label class="toggle"><input type="checkbox" id="s-nightly" /><span></span>Use nightly builds (newest, less tested)</label>
+          <label class="toggle"><input type="checkbox" id="s-keep" /><span></span>Keep the launcher open while playing</label>
+        </details>
+
+        <div class="form-foot">
+          <span class="saved hidden" id="s-saved">Saved ✓</span>
+          <span class="form-error" id="s-error"></span>
+          <button class="btn btn-primary" id="s-save">Save settings</button>
+        </div>
+      </div>
+      <p class="muted small center" id="about-line"></p>
+    </section>
+
+    <!-- LOGS -->
+    <section class="page" id="page-logs">
+      <header class="page-head row">
+        <div>
+          <h2>Logs</h2>
+          <p class="muted">What the launcher and the game are doing. Useful when asking for help.</p>
+        </div>
+        <div class="row gap">
+          <button class="btn btn-ghost" id="log-copy">Copy</button>
+          <button class="btn btn-ghost" id="log-clear">Clear</button>
+        </div>
+      </header>
+      <pre class="log" id="log"></pre>
+    </section>
+  </main>
+
+  <div class="toast hidden" id="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>
