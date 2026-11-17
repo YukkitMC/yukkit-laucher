@@ -402,23 +402,23 @@ async function loadNotes(quiet) {
     try {
       state.notes = await invoke("get_patch_notes");
     } catch (e) {
-      if (!quiet) $("notes").innerHTML = `<p class="muted">Patch notes need an internet connection. ${esc(normalizeError(e).message)}</p>`;
+      if (!quiet) $("notes").innerHTML = `<p class="notes-empty">Patch notes need an internet connection. ${esc(normalizeError(e).message)}</p>`;
       renderNews();
       return;
     }
   }
   renderNews();
   const box = $("notes");
-  if (!state.notes.length) { box.innerHTML = `<p class="muted">No releases yet.</p>`; return; }
+  if (!state.notes.length) { box.innerHTML = `<p class="notes-empty">No releases yet.</p>`; return; }
   box.innerHTML = state.notes
     .map((r, i) => `
       <article class="release">
         <div class="release-head">
-          <h3>${esc(shortTitle(r.title))}</h3>
-          <span class="muted">${esc(r.tag)} · ${esc(formatDate(r.date))}</span>
+          <h2 class="release-title">${esc(shortTitle(r.title))}</h2>
+          <span class="release-meta">${esc(r.tag)} · ${esc(formatDate(r.date))}</span>
         </div>
         <div class="md">${markdown(r.notes)}</div>
-        <button class="link" data-release="${i}">Open on GitHub ↗</button>
+        <button class="link" data-release="${i}">Open on GitHub<svg class="icon" aria-hidden="true"><use href="#i-arrow-up-right"/></svg></button>
       </article>`)
     .join("");
   box.querySelectorAll("[data-release]").forEach((b) => (b.onclick = () => openLink(state.notes[b.dataset.release].url)));

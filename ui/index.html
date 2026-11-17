@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="css/sidebar.css" />
   <link rel="stylesheet" href="css/play.css" />
   <link rel="stylesheet" href="css/versions.css" />
+  <link rel="stylesheet" href="css/notes.css" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -170,10 +171,14 @@
     </section>
 
     <!-- PATCH NOTES -->
-    <section class="page" id="page-notes">
-      <h2 class="title">Patch notes</h2>
-      <p class="subtitle">What changed in each Yukkit Toolkit release, newest first.</p>
-      <div id="notes"><p class="muted">Loading…</p></div>
+    <section class="page" id="page-notes" aria-labelledby="notes-title">
+      <header class="page-header">
+        <div>
+          <h1 class="page-title" id="notes-title">Patch notes</h1>
+          <p class="page-subtitle">What changed in each Yukkit Toolkit release, newest first.</p>
+        </div>
+      </header>
+      <div id="notes" aria-live="polite"><p class="notes-empty">Loading…</p></div>
     </section>
 
     <!-- SETTINGS -->

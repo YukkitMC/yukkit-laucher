@@ -14,22 +14,6 @@
 .subtitle { color: var(--muted); margin: 0 0 26px; }
 .title-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
 
-/* Patch notes */
-.release { padding: 22px 0 18px; border-top: 1px solid var(--line); }
-.release-head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
-.release-head h3 { margin: 0; font-size: 16px; }
-.release-head .muted { font-size: 12px; flex-shrink: 0; }
-.md { color: var(--soft); user-select: text; }
-.md h1, .md h2, .md h4 { font-size: 14px; color: var(--text); margin: 16px 0 6px; }
-.md h1 { display: none; }
-.md p { margin: 8px 0; }
-.md ul { margin: 6px 0; padding: 0; list-style: none; }
-.md li { position: relative; padding-left: 18px; margin: 4px 0; }
-.md li::before { content: "–"; position: absolute; left: 0; color: var(--muted); }
-.md b { color: var(--text); }
-.md code { font: 12px var(--mono); background: rgba(255,255,255,.06); padding: 1px 5px; border-radius: 4px; }
-.release .link { font-size: 12px; margin-top: 6px; }
-
 /* Settings */
 .settings { border-top: 1px solid var(--line); }
 .setting {
