@@ -90,6 +90,7 @@ html.mica .content { background: var(--bg-canvas-mica); }
 
 /* ---------- Windows contrast themes ---------- */
 @media (forced-colors: active) {
+  html, html.mica { background: Canvas; }
   .content { border-color: CanvasText; }
   :focus-visible { outline-color: Highlight; }
 }

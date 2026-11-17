@@ -100,7 +100,7 @@
 }
 .switch-track::after {
   content: ""; position: absolute; left: 2px; top: 2px; width: 18px; height: 18px; border-radius: 50%;
-  background: #ffffff; box-shadow: 0 1px 3px rgba(0, 0, 0, .3);
+  background: var(--switch-knob); box-shadow: 0 1px 3px rgba(0, 0, 0, .3);
   transition: transform var(--dur-base) var(--ease);
 }
 .switch input:checked + .switch-track { background: var(--accent-fill); }
@@ -209,11 +209,11 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .28); }
 .sheet-title { font: var(--type-headline); }
 .sheet-text { color: var(--label-2); margin-top: var(--space-2); }
 .sheet-actions { display: flex; justify-content: flex-end; gap: var(--space-2); margin-top: var(--space-5); }
-.btn-destructive { background: var(--danger-fill); border-color: transparent; color: #ffffff; }
-.btn-destructive:hover:not(:disabled) { background: color-mix(in srgb, var(--danger-fill), #000 12%); }
+.btn-destructive { background: var(--danger-fill); border-color: transparent; color: var(--on-accent); }
+.btn-destructive:hover:not(:disabled) { filter: brightness(.9); }
 
 @media (forced-colors: active) {
   .btn, .field, .select select, .segmented button.active, .switch-track, .group, .notice, .toast, dialog.sheet { border: 1px solid CanvasText; }
-  .segmented button.active { background: Highlight; color: HighlightText; }
+  .segmented button.active { outline: 2px solid Highlight; outline-offset: -2px; }
   .switch input:checked + .switch-track { background: Highlight; }
 }
