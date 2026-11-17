@@ -42,7 +42,7 @@ The UI is plain HTML/CSS/JS in `ui/`, so there's no bundler and nothing to compi
 npm run build        # → src-tauri/target/release/bundle/nsis/*-setup.exe
 ```
 
-When you push a tag like `v0.1.1`, GitHub Actions (`.github/workflows/build.yml`) builds the Windows installer and a portable `.exe` and attaches both to a GitHub Release. Every push to `main` also builds and uploads them as workflow artifacts.
+GitHub Actions (`.github/workflows/build.yml`) builds the Windows installer and a portable `.exe` on every push. To publish a new GitHub Release, change `version` in `src-tauri/tauri.conf.json` (and `Cargo.toml`) and push to `main`. The workflow creates the release `v<version>` if it doesn't exist yet. Pushing a `v*` tag works too.
 
 ## Project layout
 
