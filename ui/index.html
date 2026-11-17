@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/sidebar.css" />
+  <link rel="stylesheet" href="css/play.css" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -81,63 +82,74 @@
     </div>
 
     <!-- PLAY -->
-    <section class="page active" id="page-play">
-      <div class="eyebrow" id="play-eyebrow">Loading…</div>
-      <h1 class="display">Yukkit</h1>
-      <p class="lede" id="play-lede">Getting things ready.</p>
-      <div class="update-line hidden" id="update-line">
-        <span class="pulse"></span>
-        <span id="update-text"></span>
-      </div>
+    <section class="page active" id="page-play" aria-labelledby="play-title">
+      <header class="play-header">
+        <p class="play-status" id="play-eyebrow">Loading…</p>
+        <h1 class="page-title" id="play-title">Yukkit</h1>
+        <p class="page-subtitle" id="play-lede">Getting things ready.</p>
+        <p class="update-line hidden" id="update-line">
+          <svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>
+          <span id="update-text"></span>
+        </p>
+      </header>
 
-      <div class="play-row">
-        <div class="playing-as">
-          Playing as <b id="playing-as-name">Player</b>
-          <button class="link" id="change-name">Change</button>
-        </div>
-        <div class="play-controls">
-          <label class="select">
-            <select id="version-select" aria-label="Game version"></select>
-          </label>
-          <button class="play-btn" id="play-btn" disabled>
-            <span class="play-label" id="play-label">Play</span>
-            <span class="play-sub" id="play-sub">Please wait</span>
+      <div class="group">
+        <div class="play-row">
+          <div class="play-meta">
+            <span class="select">
+              <select id="version-select" aria-label="Game version"></select>
+              <svg class="icon" aria-hidden="true"><use href="#i-chevron-updown"/></svg>
+            </span>
+            <div class="playing-as">
+              <span>Playing as <b id="playing-as-name">Player</b></span>
+              <button class="link" id="change-name" aria-label="Change player name">Change</button>
+            </div>
+          </div>
+          <button class="play-btn" id="play-btn" disabled aria-describedby="play-sub">
+            <svg class="icon lg" aria-hidden="true"><use href="#i-play"/></svg>
+            <span class="play-text">
+              <span class="play-label" id="play-label">Play</span>
+              <span class="play-sub" id="play-sub">Please wait</span>
+            </span>
           </button>
         </div>
-      </div>
 
-      <div class="progress hidden" id="progress">
-        <div class="progress-head">
-          <span id="progress-title">Getting ready</span>
-          <span class="muted" id="progress-step"></span>
-        </div>
-        <div class="bar"><div class="bar-fill" id="progress-fill"></div></div>
-        <div class="progress-detail" id="progress-detail"></div>
-      </div>
-
-      <div class="rows" id="status-rows">
-        <div class="row" id="row-java">
-          <div class="row-label">Java</div>
-          <div class="row-text"></div>
-          <div class="row-state"></div>
-        </div>
-        <div class="row" id="row-minecraft">
-          <div class="row-label">Minecraft &amp; Fabric</div>
-          <div class="row-text"></div>
-          <div class="row-state"></div>
-        </div>
-        <div class="row" id="row-toolkit">
-          <div class="row-label">Yukkit Toolkit</div>
-          <div class="row-text"></div>
-          <div class="row-state"></div>
+        <div class="progress hidden" id="progress">
+          <div class="progress-head">
+            <span class="progress-title" id="progress-title">Getting ready</span>
+            <span class="progress-step" id="progress-step"></span>
+          </div>
+          <div class="bar" id="progress-bar" role="progressbar" aria-labelledby="progress-title" aria-valuemin="0" aria-valuemax="100">
+            <div class="bar-fill" id="progress-fill"></div>
+          </div>
+          <div class="progress-detail" id="progress-detail" aria-live="polite"></div>
         </div>
       </div>
 
-      <div class="section-head">
-        <h3>Latest news</h3>
-        <button class="link" data-goto="notes">All patch notes</button>
+      <div class="section-header"><h2 class="section-title">Ready check</h2></div>
+      <div class="group" id="status-rows">
+        <div class="group-row with-icon" id="row-java">
+          <svg class="icon lg row-icon" aria-hidden="true"><use href="#i-check-circle"/></svg>
+          <div class="row-main"><div class="row-title">Java</div><div class="row-subtitle row-text"></div></div>
+          <span class="status row-state"></span>
+        </div>
+        <div class="group-row with-icon" id="row-minecraft">
+          <svg class="icon lg row-icon" aria-hidden="true"><use href="#i-check-circle"/></svg>
+          <div class="row-main"><div class="row-title">Minecraft &amp; Fabric</div><div class="row-subtitle row-text"></div></div>
+          <span class="status row-state"></span>
+        </div>
+        <div class="group-row with-icon" id="row-toolkit">
+          <svg class="icon lg row-icon" aria-hidden="true"><use href="#i-check-circle"/></svg>
+          <div class="row-main"><div class="row-title">Yukkit Toolkit</div><div class="row-subtitle row-text"></div></div>
+          <span class="status row-state"></span>
+        </div>
       </div>
-      <div class="news" id="news"></div>
+
+      <div class="section-header">
+        <h2 class="section-title">Latest releases</h2>
+        <button class="link" data-goto="notes">All patch notes<svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></button>
+      </div>
+      <div class="group" id="news"></div>
 
       <p class="fineprint">
         Some modules can get you banned on servers that don't allow them. Yukkit Toolkit is made for anarchy servers.

@@ -112,10 +112,16 @@ function selectedVersion() {
 function setRow(id, ready, text) {
   const row = $(id);
   row.querySelector(".row-text").textContent = text;
+  const icon = row.querySelector(".row-icon");
+  icon.classList.toggle("ok", ready);
+  icon.classList.toggle("caution", !ready);
+  icon.querySelector("use").setAttribute("href", ready ? "#i-check-circle" : "#i-down-circle");
   const s = row.querySelector(".row-state");
-  s.className = "row-state " + (ready ? "ok" : "todo");
+  s.className = "status row-state " + (ready ? "ok" : "caution");
   s.textContent = ready ? "Ready" : "Will be installed";
 }
+const statusLabel = (kind, text) =>
+  `<span class="status ${kind}"><svg class="icon" aria-hidden="true"><use href="#i-${kind === "ok" ? "check-circle" : "down-circle"}"/></svg>${text}</span>`;
 
 function renderPlay() {
   const o = state.overview;
@@ -142,13 +148,13 @@ function renderPlay() {
 
   const ready = v.installed && v.checks.java && v.checks.minecraft && v.checks.toolkit;
   const status = !v.installed
-    ? `<span class="warn">Not installed yet</span>`
+    ? statusLabel("caution", "Not installed yet")
     : !ready
-      ? `<span class="warn">Needs repair</span>`
+      ? statusLabel("caution", "Needs repair")
       : o.updateAvailable
-        ? `<span class="warn">Update available</span>`
-        : `<span class="ok">Ready to play</span>`;
-  $("play-eyebrow").innerHTML = `Minecraft ${esc(v.minecraft)} · ${status}`;
+        ? statusLabel("caution", "Update available")
+        : statusLabel("ok", "Ready to play");
+  $("play-eyebrow").innerHTML = `<span>Minecraft ${esc(v.minecraft)}</span><span aria-hidden="true">·</span>${status}`;
 
   const tag = v.installed ? v.installed.toolkitTag : o.latest ? o.latest.tag : "";
   $("play-lede").textContent = `${tag ? tag + " · " : ""}${v.description || "Yukkit Toolkit on Fabric."}`;
@@ -175,9 +181,11 @@ function renderButton() {
   const v = selectedVersion();
   const btn = $("play-btn");
   btn.classList.remove("running");
+  btn.querySelector(".icon use").setAttribute("href", "#i-play");
   if (state.running) {
     btn.disabled = true;
     btn.classList.add("running");
+    btn.querySelector(".icon use").setAttribute("href", "#i-check-circle");
     $("play-label").textContent = "Playing";
     $("play-sub").textContent = "Close the game to play again";
     return;
@@ -191,7 +199,7 @@ function renderButton() {
   btn.disabled = !v;
   if (!v) { $("play-label").textContent = "Play"; $("play-sub").textContent = "Nothing to play yet"; return; }
   const ready = v.installed && v.checks.java && v.checks.minecraft && v.checks.toolkit;
-  $("play-label").textContent = `PLAY ${v.minecraft}`;
+  $("play-label").textContent = `Play ${v.minecraft}`;
   $("play-sub").textContent = !v.installed
     ? "Installs first, about 600 MB"
     : !ready ? "Repairs missing files first"
@@ -206,23 +214,18 @@ function renderNews() {
     box.innerHTML = `<div class="news-empty">${o && o.error ? "News shows up here when you're online." : "Loading news…"}</div>`;
     return;
   }
-  const arts = [
-    "radial-gradient(120% 140% at 0% 0%, #2b86ff 0%, #13235a 55%, #0b0c10 100%)",
-    "radial-gradient(120% 140% at 100% 0%, #7a6bff 0%, #221a55 55%, #0b0c10 100%)",
-    "radial-gradient(120% 140% at 50% 100%, #3fc1ff 0%, #0f3350 55%, #0b0c10 100%)",
-  ];
   box.innerHTML = list
     .map((r, i) => `
-      <button class="news-card" data-i="${i}">
-        <div class="news-art" style="--art:${arts[i % arts.length]}"><span>${esc(r.tag)}</span></div>
-        <div class="news-body">
-          <div class="news-title">${esc(shortTitle(r.title))}</div>
-          <div class="news-meta">${esc(formatDate(r.date))}${r.prerelease ? " · preview" : ""}</div>
-          <div class="news-text">${esc(firstLine(r.notes))}</div>
+      <button class="group-row news-row" data-i="${i}">
+        <div class="row-main">
+          <div class="row-title">${esc(shortTitle(r.title))}</div>
+          <div class="row-subtitle">${esc(firstLine(r.notes))}</div>
+          <div class="news-meta">${esc(formatDate(r.date))}${r.prerelease ? " · Preview" : ""}</div>
         </div>
+        <svg class="icon row-chevron" aria-hidden="true"><use href="#i-chevron-right"/></svg>
       </button>`)
     .join("");
-  box.querySelectorAll(".news-card").forEach((c) => (c.onclick = () => showPage("notes")));
+  box.querySelectorAll(".news-row").forEach((c) => (c.onclick = () => showPage("notes")));
 }
 
 async function refresh() {
@@ -281,12 +284,18 @@ function setProgress(p) {
   $("progress-step").textContent = `Step ${p.step} of ${p.steps}`;
   $("progress-detail").textContent = p.detail || "";
   const fill = $("progress-fill");
+  const bar = $("progress-bar");
   if (p.fraction === null || p.fraction === undefined) {
     fill.classList.add("indeterminate");
+    bar.removeAttribute("aria-valuenow");
+    bar.setAttribute("aria-valuetext", `Step ${p.step} of ${p.steps}`);
   } else {
     fill.classList.remove("indeterminate");
     const overall = (p.step - 1 + Math.min(1, Math.max(0, p.fraction))) / p.steps;
-    fill.style.width = `${Math.round(overall * 100)}%`;
+    const pct = Math.round(overall * 100);
+    fill.style.width = `${pct}%`;
+    bar.setAttribute("aria-valuenow", String(pct));
+    bar.setAttribute("aria-valuetext", `${pct}%, step ${p.step} of ${p.steps}`);
   }
 }
 
