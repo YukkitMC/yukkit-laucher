@@ -23,8 +23,24 @@ const AnnouncementsService = (() => {
     } catch { return null; }
   }
 
+  // Saved by an older version (may hold posts whose HTML was never decoded).
+  C.oldCacheKeys.forEach((k) => { try { localStorage.removeItem(k); } catch {} });
+
   /* ---------- Feed → posts ---------- */
   const parseHtml = (html) => new DOMParser().parseFromString(html || "", "text/html"); // inert: no scripts, no loads
+
+  /**
+   * When HTML is pasted into Blogger's visual editor, the feed carries it escaped
+   * ("<p>&lt;p&gt;&lt;img …"), and it would show as text. Decode it then — but only when the
+   * post has escaped tags and no real markup besides plain wrappers, so a normal post that
+   * shows code (inside <pre>/<code>) stays as it is.
+   */
+  function decodeIfEscaped(html) {
+    if (!/&lt;\/?[a-z][a-z0-9]*(\s|&gt;|\/)/i.test(html)) return html;
+    const doc = parseHtml(html);
+    const realTags = doc.body.querySelectorAll("*:not(p):not(br):not(div):not(span)").length;
+    return realTags ? html : doc.body.textContent;
+  }
 
   function excerptOf(doc) {
     // textContent glues blocks together ("new" + "Right" -> "newRight"); separate them first.
@@ -40,7 +56,7 @@ const AnnouncementsService = (() => {
   const bigImage = (url) => url.replace(/\/s72(-c)?\//, "/s1200/").replace(/=s72(-c)?$/, "=s1200");
 
   function toPost(entry) {
-    const html = (entry.content && entry.content.$t) || (entry.summary && entry.summary.$t) || "";
+    const html = decodeIfEscaped((entry.content && entry.content.$t) || (entry.summary && entry.summary.$t) || "");
     const doc = parseHtml(html);
     const thumb = entry.media$thumbnail && entry.media$thumbnail.url;
     const firstImg = doc.querySelector("img[src]");
@@ -50,6 +66,7 @@ const AnnouncementsService = (() => {
       title: (entry.title && entry.title.$t) || "",
       published: entry.published && entry.published.$t,
       html,
+      // No thumbnail in the feed: the first picture in the (decoded) post becomes the cover.
       cover: thumb ? bigImage(thumb) : firstImg ? firstImg.getAttribute("src") : null,
       url: alt ? alt.href : null,
       tags: (entry.category || []).map((c) => c.term).filter(Boolean),

@@ -8,7 +8,8 @@ const ANNOUNCEMENTS_CONFIG = Object.freeze({
   excerptLength: 160,
   /** Hosts allowed inside <iframe> in posts (YouTube embeds). */
   iframeHosts: ["www.youtube.com", "youtube.com", "www.youtube-nocookie.com", "youtube-nocookie.com"],
-  /** localStorage keys. */
-  cacheKey: "yukkit-announcements-cache",
+  /** localStorage keys. v2 drops caches saved before escaped posts were decoded. */
+  cacheKey: "announcements_cache_v2",
+  oldCacheKeys: ["yukkit-announcements-cache"],
   seenKey: "yukkit-announcements-seen",
 });

@@ -17,6 +17,8 @@ Object.assign(I18n.DICT.pt, {
   "When the Yukkit team posts news, it shows up here.": "Quando a equipe Yukkit publicar novidades, elas aparecem aqui.",
   "All announcements": "Todos os anúncios",
   "Open on Blogger": "Abrir no Blogger",
+  "Refresh": "Atualizar",
+  "Load the newest posts now": "Carregar os posts mais novos agora",
   "1 new": "1 novo",
   "{n} new": "{n} novos",
 
@@ -245,6 +247,8 @@ Object.assign(I18n.DICT.es, {
   "When the Yukkit team posts news, it shows up here.": "Cuando el equipo de Yukkit publique noticias, aparecerán aquí.",
   "All announcements": "Todos los anuncios",
   "Open on Blogger": "Abrir en Blogger",
+  "Refresh": "Actualizar",
+  "Load the newest posts now": "Cargar las entradas más nuevas ahora",
   "1 new": "1 nuevo",
   "{n} new": "{n} nuevos",
 

@@ -5,9 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Yukkit Launcher</title>
   <link rel="icon" href="img/yukkit.svg" />
-  <script>
-    try { const t = localStorage.getItem("yukkit-theme"); if (t === "dark" || t === "oled") document.documentElement.dataset.theme = t; } catch {}
-  </script>
+  <script src="boot.js"></script>
   <link rel="stylesheet" href="css/tokens.css" />
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/components.css" />
@@ -263,6 +261,9 @@
             <h1 class="page-title" id="ann-title">Announcements</h1>
             <p class="page-subtitle">News from the Yukkit team.</p>
           </div>
+          <button class="btn btn-small btn-quiet ann-refresh" id="ann-refresh" title="Load the newest posts now">
+            <svg class="icon" aria-hidden="true"><use href="#i-retry"/></svg>Refresh
+          </button>
         </header>
         <div id="ann-status" data-no-i18n aria-live="polite"></div>
         <div id="ann-list" data-no-i18n aria-live="polite"></div>

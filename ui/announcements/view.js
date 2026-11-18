@@ -32,13 +32,34 @@ const AnnouncementsView = (() => {
       node.setAttribute("loading", "lazy");
     }
   });
+  // Inline styles stay (posts use them for colored notice boxes), minus anything that could lift
+  // the post out of its column over the launcher's own UI, or load something from outside.
+  DOMPurify.addHook("uponSanitizeAttribute", (node, data) => {
+    if (data.attrName !== "style") return;
+    data.attrValue = data.attrValue
+      .split(";")
+      .map((d) => d.trim())
+      .filter((d) => {
+        const i = d.indexOf(":");
+        if (i < 1) return false;
+        const prop = d.slice(0, i).trim().toLowerCase();
+        const value = d.slice(i + 1).toLowerCase();
+        return !/^(position|z-index|top|left|right|bottom|inset|transform|translate|scale|rotate|animation|transition)/.test(prop)
+          && !/url\(|expression\(|@import/.test(value);
+      })
+      .join("; ");
+  });
   const sanitize = (html) => DOMPurify.sanitize(html, {
     ADD_TAGS: ["iframe"],
-    ADD_ATTR: ["allow", "allowfullscreen", "frameborder"],
-    // Blogger's inline styles and font colors fight the app's light/dark themes.
-    FORBID_TAGS: ["style", "form", "input", "button", "textarea", "select", "font"],
-    FORBID_ATTR: ["style", "color", "bgcolor", "face", "align"],
+    ADD_ATTR: ["style", "target", "allow", "allowfullscreen", "frameborder"],
+    FORBID_TAGS: ["style", "form", "input", "button", "textarea", "select"],
   });
+
+  // Same picture at a different Blogger size (/s1200/, =s72-c, …) counts as the same picture.
+  const samePicture = (a, b) => {
+    const n = (u) => String(u || "").replace(/^https?:/, "").replace(/\/s\d+(-[a-z])?\//, "/").replace(/=s\d+(-[a-z])?$/, "");
+    return !!a && !!b && n(a) === n(b);
+  };
 
   /* ---------- Pieces ---------- */
   const formatDate = (iso) => {
@@ -137,6 +158,11 @@ const AnnouncementsView = (() => {
         <div class="ann-content">${sanitize(post.html)}</div>
         ${url ? `<p class="ann-source"><button class="link" data-ann-link="${esc(url)}">${esc(t("Open on Blogger"))}<svg class="icon" aria-hidden="true"><use href="#i-arrow-up-right"/></svg></button></p>` : ""}
       </article>`;
+    // The cover came from the post's first picture: don't show it twice at the top.
+    const hero = reader.querySelector(".ann-cover-hero");
+    const firstImg = reader.querySelector(".ann-content img");
+    if (hero && firstImg && samePicture(firstImg.getAttribute("src"), post.cover)) hero.remove();
+
     // Responsive 16:9 frame for videos, scroll box for wide tables.
     const title = reader.querySelector("#ann-article-title");
     reader.querySelectorAll(".ann-content iframe").forEach((f) => {
@@ -223,7 +249,11 @@ const AnnouncementsView = (() => {
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape" && openId && onPage() && !document.querySelector("dialog[open]")) { e.preventDefault(); close(); }
     });
+    const refresh = $id("ann-refresh");
+    refresh.addEventListener("click", () => S.load({ force: true }));
     S.subscribe((st) => {
+      refresh.disabled = st.loading;
+      refresh.classList.toggle("is-loading", st.loading);
       renderBadge();
       if (!openId) renderList(st);
       if (onPage() && st.posts) S.markAllSeen();

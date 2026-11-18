@@ -49,6 +49,7 @@
 @container content (min-width: 760px) {
   .ann-card.ann-featured { flex-direction: row; }
   .ann-featured .ann-cover { width: 58%; aspect-ratio: auto; min-height: 280px; }
+  .ann-featured .ann-cover img:not(.ann-cover-empty img) { position: absolute; inset: 0; }
   .ann-featured .ann-card-body { justify-content: center; padding: var(--space-6); gap: var(--space-3); }
 }
 
@@ -87,6 +88,11 @@
 .ann-offline .icon { color: var(--caution); }
 .ann-offline .link { margin-left: auto; }
 
+/* ---------- Refresh ---------- */
+.ann-refresh.is-loading .icon { animation: ann-spin .9s linear infinite; }
+@keyframes ann-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .ann-refresh.is-loading .icon { animation: none; } }
+
 /* ---------- Reader ---------- */
 #ann-reader { max-width: 760px; margin-inline: auto; }
 .ann-back { margin: 0 0 var(--space-4) calc(-1 * var(--space-3)); }
@@ -100,14 +106,19 @@
 .ann-content { font: var(--type-body); font-size: .9375rem; line-height: 1.6; color: var(--label); user-select: text; overflow-wrap: anywhere; }
 .ann-content > :first-child { margin-top: 0; }
 .ann-content p, .ann-content div { margin: 0 0 var(--space-3); }
-.ann-content div:has(> img), .ann-content div:has(> a > img), .ann-content .separator { text-align: center; }
+/* Blogger often wraps a whole post in a centered "separator" div. Read text from the left edge;
+   only pictures stay centered. (An inline text-align on the element itself still wins.) */
+.ann-content p, .ann-content ul, .ann-content ol, .ann-content h1, .ann-content h2, .ann-content h3,
+.ann-content h4, .ann-content h5, .ann-content h6, .ann-content blockquote, .ann-content pre { text-align: start; }
+.ann-content p:has(> img:only-child), .ann-content p:has(> a:only-child > img),
+.ann-content div:has(> img), .ann-content div:has(> a > img) { text-align: center; }
 .ann-content h1, .ann-content h2 { font: var(--type-title); margin: var(--space-6) 0 var(--space-2); }
 .ann-content h3, .ann-content h4, .ann-content h5, .ann-content h6 { font: var(--type-headline); margin: var(--space-5) 0 var(--space-2); }
 .ann-content ul, .ann-content ol { margin: 0 0 var(--space-3); padding-left: var(--space-5); }
 .ann-content li { margin: var(--space-1) 0; }
 .ann-content li::marker { color: var(--label-3); }
 .ann-content a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
-.ann-content img { max-width: 100%; height: auto; border-radius: var(--radius-group); display: inline-block; }
+.ann-content img { max-width: 100%; height: auto; border-radius: 12px; display: inline-block; }
 .ann-content figure { margin: var(--space-4) 0; }
 .ann-content figcaption, .ann-content .tr-caption { font: var(--type-footnote); color: var(--label-2); text-align: center; margin-top: var(--space-1); }
 .ann-content blockquote { margin: var(--space-4) 0; padding: var(--space-1) var(--space-4); border-left: 3px solid var(--accent-fill); color: var(--label-2); }
