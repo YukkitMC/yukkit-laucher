@@ -16,7 +16,7 @@ const state = {
 };
 
 /* ---------- Navigation ---------- */
-const PAGES = ["play", "versions", "notes", "settings", "logs"];
+const PAGES = ["play", "versions", "customize", "notes", "settings", "logs"];
 function showPage(name) {
   document.querySelectorAll(".nav-item").forEach((b) => {
     const on = b.dataset.page === name;
@@ -26,6 +26,7 @@ function showPage(name) {
   document.querySelectorAll(".page").forEach((p) => p.classList.toggle("active", p.id === `page-${name}`));
   if (name === "logs") renderLog();
   if (name === "notes") loadNotes();
+  if (name === "customize") loadCustomize();
   $("notice").classList.toggle("on-other-page", name !== "play");
 }
 document.querySelectorAll(".nav-item").forEach((b) => b.addEventListener("click", () => showPage(b.dataset.page)));
@@ -579,7 +580,8 @@ document.querySelectorAll("[role=radiogroup]").forEach((group) => {
     const i = items.indexOf(document.activeElement);
     const next = items[(i + keys[e.key] + items.length) % items.length];
     next.focus();
-    next.click();
+    // Arrows choose; they never open a file picker (the Upload tile waits for Enter or a click).
+    if (!next.classList.contains("tile-upload")) next.click();
   });
 });
 function segValue(id) {
@@ -603,6 +605,7 @@ async function loadSettings() {
   state.defaultInstallDir = view.defaultInstallDir;
   $("launcher-version").textContent = `Launcher ${view.version}`;
   $("s-username").value = s.username;
+  $("cz-nametag").textContent = s.username;
   nameFeedback();
   $("s-auto").checked = s.autoUpdate;
   setSeg("s-channel", s.previews ? "preview" : "stable");
@@ -644,6 +647,7 @@ function nameFeedback() {
   const bad = v.length > 0 && /[^A-Za-z0-9_]/.test(v);
   $("s-username-count").textContent = `${v.length}/16`;
   $("s-name-avatar").textContent = (v || "P")[0].toUpperCase();
+  if (valid) $("cz-nametag").textContent = v;
   let kind = "info", msg = NAME_HELP;
   if (bad) { kind = "error"; msg = "Only letters, numbers and underscores. No spaces or symbols."; }
   else if (v.length && v.length < 3) { kind = "error"; msg = `Add ${3 - v.length} more ${3 - v.length === 1 ? "character" : "characters"}. Names need at least 3.`; }
@@ -701,6 +705,144 @@ $("s-install-reset").onclick = async () => {
   if (await saveSettings({ installDir: "" })) $("s-install").textContent = state.defaultInstallDir;
 };
 $("s-install-open").onclick = () => invoke("open_install_folder").catch(showError);
+
+/* ---------- Customize: skin and cape ---------- */
+const cz = { loaded: false, skin: new Map(), cape: new Map(), customSkin: null, customCape: null };
+
+// Picture for an id: canvas for presets, image for custom, null for default skin / no cape.
+function czImage(kind, id) {
+  if (kind === "skin" && id === "default") return null;
+  if (kind === "cape" && id === "none") return null;
+  if (id === "custom") return kind === "skin" ? cz.customSkin : cz.customCape;
+  return cz[kind].get(id) || null;
+}
+
+function czModel() { return (state.settings && state.settings.skinModel) || "classic"; }
+
+function renderPreview() {
+  if (!state.settings) return;
+  const skin = czImage("skin", state.settings.skin || "default");
+  const cape = czImage("cape", state.settings.cape || "none");
+  const silhouette = getComputedStyle(document.documentElement).getPropertyValue("--fill-track").trim() || "#8e8e96";
+  Cosmetics.render($("cz-front"), { skin, cape, model: czModel(), view: "front", silhouette });
+  Cosmetics.render($("cz-back"), { skin, cape, model: czModel(), view: "back", silhouette });
+}
+
+function tile(kind, id, name, img, selected) {
+  const b = document.createElement("button");
+  b.className = "tile";
+  b.setAttribute("role", "radio");
+  b.dataset.value = id;
+  const art = document.createElement("canvas");
+  art.className = "tile-art";
+  art.setAttribute("aria-hidden", "true");
+  if (kind === "skin") {
+    art.width = 64; art.height = 128;
+    Cosmetics.render(art, { skin: img, cape: null, model: czModel(), view: "front", silhouette: getComputedStyle(document.documentElement).getPropertyValue("--fill-track").trim() });
+  } else {
+    art.width = 60; art.height = 96;
+    if (img) {
+      const ctx = art.getContext("2d");
+      ctx.imageSmoothingEnabled = false;
+      const k = img.width / 64;
+      ctx.drawImage(img, 1 * k, 1 * k, 10 * k, 16 * k, 0, 0, 60, 96);
+    }
+  }
+  const label = document.createElement("span");
+  label.className = "tile-label";
+  label.textContent = name;
+  b.append(art, label);
+  if (!img && (id === "default" || id === "none")) b.classList.add("tile-empty");
+  if (id === "custom" && !img) {
+    b.classList.add("tile-upload");
+    art.remove();
+    b.insertAdjacentHTML("afterbegin", `<svg class="icon lg" aria-hidden="true"><use href="#i-upload"/></svg>`);
+  }
+  b.onclick = () => (id === "custom" && !img ? uploadCosmetic(kind) : chooseCosmetic(kind, id));
+  return b;
+}
+
+function renderPickers() {
+  const s = state.settings;
+  const skins = $("cz-skins");
+  skins.replaceChildren(
+    tile("skin", "default", "Default", null),
+    ...Cosmetics.SKINS.map((p) => tile("skin", p.id, p.name, cz.skin.get(p.id))),
+    tile("skin", "custom", cz.customSkin ? "Your skin" : "Upload…", cz.customSkin),
+  );
+  const capes = $("cz-capes");
+  capes.replaceChildren(
+    tile("cape", "none", "No cape", null),
+    ...Cosmetics.CAPES.map((p) => tile("cape", p.id, p.name, cz.cape.get(p.id))),
+    tile("cape", "custom", cz.customCape ? "Your cape" : "Upload…", cz.customCape),
+  );
+  setSeg("cz-skins", s.skin || "default");
+  setSeg("cz-capes", s.cape || "none");
+  setSeg("s-model", czModel());
+}
+
+async function loadCustomize() {
+  if (!state.settings) return;
+  if (!cz.loaded) {
+    // Presets are painted once per arm model; custom pictures come from the launcher's folder.
+    Cosmetics.SKINS.forEach((p) => cz.skin.set(p.id, Cosmetics.paintSkin(p, czModel())));
+    Cosmetics.CAPES.forEach((p) => cz.cape.set(p.id, Cosmetics.paintCape(p)));
+    try {
+      const view = await invoke("get_cosmetics");
+      if (view && view.customSkin) cz.customSkin = await Cosmetics.fromBytes(view.customSkin);
+      if (view && view.customCape) cz.customCape = await Cosmetics.fromBytes(view.customCape);
+    } catch (e) { showError(e); }
+    cz.loaded = true;
+  }
+  renderPickers();
+  renderPreview();
+}
+
+async function activePng(kind, id) {
+  const img = czImage(kind, id);
+  if (!img) return null;
+  if (img instanceof HTMLCanvasElement) return Cosmetics.toPng(img);
+  const c = document.createElement("canvas");
+  c.width = img.width; c.height = img.height;
+  c.getContext("2d").drawImage(img, 0, 0);
+  return Cosmetics.toPng(c);
+}
+
+async function chooseCosmetic(kind, id) {
+  const key = kind === "skin" ? "skin" : "cape";
+  setSeg(kind === "skin" ? "cz-skins" : "cz-capes", id);
+  try {
+    await invoke("set_cosmetic", { kind, png: await activePng(kind, id) });
+    if (await saveSettings({ [key]: id }, true)) {
+      renderPreview();
+      toast(kind === "skin" ? "Skin saved" : id === "none" ? "Cape removed" : "Cape saved");
+    }
+  } catch (e) { showError(e); }
+}
+
+async function uploadCosmetic(kind) {
+  try {
+    const bytes = await invoke("pick_cosmetic", { kind });
+    if (!bytes) return;
+    const img = await Cosmetics.fromBytes(bytes);
+    if (kind === "skin") cz.customSkin = img; else cz.customCape = img;
+    renderPickers();
+    await chooseCosmetic(kind, "custom");
+  } catch (e) { showError(e); }
+}
+
+$("cz-skin-upload").onclick = () => uploadCosmetic("skin");
+$("cz-cape-upload").onclick = () => uploadCosmetic("cape");
+$("s-model").querySelectorAll("button").forEach((b) => (b.onclick = async () => {
+  setSeg("s-model", b.dataset.value);
+  if (!(await saveSettings({ skinModel: b.dataset.value }, true))) return;
+  // Preset skins are repainted for the new arm width.
+  Cosmetics.SKINS.forEach((p) => cz.skin.set(p.id, Cosmetics.paintSkin(p, czModel())));
+  renderPickers();
+  renderPreview();
+  const id = state.settings.skin || "default";
+  if (id !== "default" && id !== "custom") invoke("set_cosmetic", { kind: "skin", png: await activePng("skin", id) }).catch(showError);
+}));
 
 /* ---------- Logs ---------- */
 function appendLog(line) {

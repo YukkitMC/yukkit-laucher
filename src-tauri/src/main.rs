@@ -1,6 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod catalog;
+mod cosmetics;
 mod errors;
 mod installer;
 mod java;
@@ -212,7 +213,52 @@ async fn play(app: AppHandle, state: State<'_, AppState>, version_id: String) ->
             None => return Err(err),
         },
     };
+    // Hand the chosen skin and cape to the Toolkit. A failure here must not stop the game.
+    if let Err(err) = cosmetics::export(&settings, &installer::instance_dir(&root, &version_id)) {
+        progress::log(&app, &format!("Couldn't copy your skin and cape to the game folder: {:#}", err));
+    }
     launch::launch(&app, &installed, &settings, state.running.clone()).await?;
+    Ok(())
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct CosmeticsView {
+    /// PNG bytes of the last uploaded skin / cape, if any.
+    custom_skin: Option<Vec<u8>>,
+    custom_cape: Option<Vec<u8>>,
+}
+
+#[tauri::command]
+fn get_cosmetics() -> CosmeticsView {
+    CosmeticsView {
+        custom_skin: cosmetics::read_custom(cosmetics::Kind::Skin),
+        custom_cape: cosmetics::read_custom(cosmetics::Kind::Cape),
+    }
+}
+
+/// Opens a file picker for a skin or cape PNG, checks it and keeps it as the custom one.
+/// Returns the picture so the page can preview it, or None if the picker was closed.
+#[tauri::command]
+async fn pick_cosmetic(app: AppHandle, kind: String) -> Result<Option<Vec<u8>>, UiError> {
+    let kind = cosmetics::Kind::parse(&kind)?;
+    let title = if kind == cosmetics::Kind::Skin { "Choose a skin (PNG)" } else { "Choose a cape (PNG)" };
+    let picked = tauri::async_runtime::spawn_blocking(move || {
+        app.dialog().file().set_title(title).add_filter("PNG picture", &["png"]).blocking_pick_file()
+    })
+    .await
+    .map_err(|e| UiError::from(anyhow::Error::new(e)))?;
+    let Some(path) = picked.and_then(|p| p.into_path().ok()) else { return Ok(None) };
+    let bytes = std::fs::read(&path).map_err(|e| UiError::from(anyhow::Error::new(e)))?;
+    cosmetics::save_custom(kind, &bytes)?;
+    Ok(Some(bytes))
+}
+
+/// Sets the active skin or cape picture (None clears it: default skin / no cape).
+#[tauri::command]
+fn set_cosmetic(kind: String, png: Option<Vec<u8>>) -> Result<(), UiError> {
+    let kind = cosmetics::Kind::parse(&kind)?;
+    cosmetics::set_active(kind, png.as_deref())?;
     Ok(())
 }
 
@@ -305,7 +351,10 @@ fn main() {
             pick_folder,
             pick_java,
             open_install_folder,
-            open_link
+            open_link,
+            get_cosmetics,
+            pick_cosmetic,
+            set_cosmetic
         ])
         .run(tauri::generate_context!())
         .expect("error while running the launcher");

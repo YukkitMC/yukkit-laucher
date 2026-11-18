@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="css/sidebar.css" />
   <link rel="stylesheet" href="css/play.css" />
   <link rel="stylesheet" href="css/versions.css" />
+  <link rel="stylesheet" href="css/customize.css" />
   <link rel="stylesheet" href="css/notes.css" />
   <link rel="stylesheet" href="css/settings.css" />
   <link rel="stylesheet" href="css/logs.css" />
@@ -40,6 +41,9 @@
     <symbol id="i-github" viewBox="0 0 16 16"><path stroke="none" fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></symbol>
     <symbol id="i-search" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.75"/><path d="m10.5 10.5 3.75 3.75"/></symbol>
     <symbol id="i-chevron-left" viewBox="0 0 16 16"><path d="M10 3.5 5.5 8 10 12.5"/></symbol>
+    <symbol id="i-shirt" viewBox="0 0 16 16"><path d="M5.75 2 2 3.75l-.5 3 2.5.75V14h8V7.5l2.5-.75-.5-3L10.25 2C9.9 3 9 3.6 8 3.6S6.1 3 5.75 2z"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 16 16"><path d="M8 10.5V2.75M5 5.5 8 2.5l3 3"/><path d="M2.75 10v3.25h10.5V10"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 16 16"><path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8z"/><circle cx="8" cy="8" r="2"/></symbol>
     <symbol id="i-retry" viewBox="0 0 16 16"><path d="M13.25 8a5.25 5.25 0 1 1-1.6-3.77"/><path d="M13.25 2.5v3h-3"/></symbol>
   </svg>
 
@@ -52,9 +56,10 @@
     <nav class="nav">
       <button class="nav-item active" data-page="play" aria-current="page" title="Play (Ctrl+1)"><svg class="icon"><use href="#i-play"/></svg>Play</button>
       <button class="nav-item" data-page="versions" title="Versions (Ctrl+2)"><svg class="icon"><use href="#i-stack"/></svg>Versions</button>
-      <button class="nav-item" data-page="notes" title="Patch notes (Ctrl+3)"><svg class="icon"><use href="#i-doc"/></svg>Patch notes</button>
+      <button class="nav-item" data-page="customize" title="Customize (Ctrl+3)"><svg class="icon"><use href="#i-shirt"/></svg>Customize</button>
+      <button class="nav-item" data-page="notes" title="Patch notes (Ctrl+4)"><svg class="icon"><use href="#i-doc"/></svg>Patch notes</button>
       <button class="nav-item" data-page="settings" title="Settings (Ctrl+,)"><svg class="icon"><use href="#i-sliders"/></svg>Settings</button>
-      <button class="nav-item" data-page="logs" title="Logs (Ctrl+5)"><svg class="icon"><use href="#i-terminal"/></svg>Logs</button>
+      <button class="nav-item" data-page="logs" title="Logs (Ctrl+6)"><svg class="icon"><use href="#i-terminal"/></svg>Logs</button>
     </nav>
 
     <div class="sidebar-foot">
@@ -190,6 +195,61 @@
       </header>
       <div class="group" id="version-list"></div>
       <p class="fineprint">More Minecraft versions are on the way. When one is released, it shows up here on its own.</p>
+    </section>
+
+    <!-- CUSTOMIZE -->
+    <section class="page" id="page-customize" aria-labelledby="customize-title">
+      <header class="page-header">
+        <div>
+          <h1 class="page-title" id="customize-title">Customize</h1>
+          <p class="page-subtitle">Pick your skin and cape. They go to Yukkit Toolkit when you press Play.</p>
+        </div>
+      </header>
+
+      <div class="customize-layout">
+        <div class="group preview-card">
+          <p class="nametag" id="cz-nametag">Player</p>
+          <div class="preview-views">
+            <figure>
+              <canvas id="cz-front" width="160" height="320" role="img" aria-label="Your character from the front"></canvas>
+              <figcaption>Front</figcaption>
+            </figure>
+            <figure>
+              <canvas id="cz-back" width="160" height="320" role="img" aria-label="Your character from the back, with the cape"></canvas>
+              <figcaption>Back</figcaption>
+            </figure>
+          </div>
+          <div class="preview-model">
+            <span class="row-title" id="cz-model-label">Arms</span>
+            <div class="segmented" id="s-model" role="radiogroup" aria-labelledby="cz-model-label">
+              <button role="radio" data-value="classic">Classic</button>
+              <button role="radio" data-value="slim">Slim</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="customize-pickers">
+          <div class="section-header picker-header">
+            <h2 class="section-title" id="cz-skin-title">Skin</h2>
+            <button class="link" id="cz-skin-upload"><svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg>Upload skin…</button>
+          </div>
+          <div class="tile-grid" id="cz-skins" role="radiogroup" aria-labelledby="cz-skin-title"></div>
+          <p class="visibility-note">
+            <svg class="icon" aria-hidden="true"><use href="#i-eye"/></svg>
+            <span>With an offline account, other players see your skin only if they also play with Yukkit Toolkit, or if the server has a skins plugin.</span>
+          </p>
+
+          <div class="section-header picker-header">
+            <h2 class="section-title" id="cz-cape-title">Cape</h2>
+            <button class="link" id="cz-cape-upload"><svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg>Upload cape…</button>
+          </div>
+          <div class="tile-grid" id="cz-capes" role="radiogroup" aria-labelledby="cz-cape-title"></div>
+          <p class="visibility-note">
+            <svg class="icon" aria-hidden="true"><use href="#i-eye"/></svg>
+            <span>One cape at a time. Only players who also use Yukkit Toolkit see it.</span>
+          </p>
+        </div>
+      </div>
     </section>
 
     <!-- PATCH NOTES -->
@@ -384,6 +444,7 @@
   </dialog>
 
   <div class="toast hidden" id="toast" role="status" aria-live="polite"><svg class="icon" aria-hidden="true"><use href="#i-check-circle"/></svg><span id="toast-text"></span></div>
+  <script src="cosmetics.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

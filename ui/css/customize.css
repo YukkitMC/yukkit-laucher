@@ -1,0 +1,54 @@
+/* Customize: a stage for the character on the left, choices on the right. */
+
+#page-customize { max-width: 1200px; }
+.customize-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-5); }
+
+/* Preview: the character is the content, so it gets the room and a quiet backdrop */
+.preview-card {
+  display: flex; flex-direction: column; align-items: center; gap: var(--space-3);
+  padding: var(--space-5) var(--space-4);
+  background:
+    radial-gradient(60% 45% at 50% 62%, var(--accent-tint), transparent 70%),
+    var(--bg-surface);
+}
+.nametag {
+  font: 600 .875rem/1.25rem var(--font-mono); color: #ffffff;
+  background: rgba(0, 0, 0, .55); padding: 2px var(--space-2); border-radius: 4px;
+}
+.preview-views { display: flex; justify-content: center; gap: var(--space-6); }
+.preview-views figure { margin: 0; display: flex; flex-direction: column; align-items: center; gap: var(--space-2); }
+.preview-views canvas { width: 160px; height: 320px; image-rendering: pixelated; filter: drop-shadow(0 10px 12px rgba(0, 0, 0, .22)); }
+.preview-views figcaption { font: var(--type-footnote); color: var(--label-2); }
+.preview-model { display: flex; align-items: center; gap: var(--space-3); }
+
+/* Pickers */
+.picker-header:first-child { margin-top: 0; }
+.tile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: var(--space-2); }
+.tile {
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: var(--space-2);
+  min-height: 132px; padding: var(--space-3) var(--space-2) var(--space-2);
+  background: var(--bg-surface); border: 1px solid var(--separator); border-radius: var(--radius-group);
+  color: var(--label); font: var(--type-callout);
+  transition: background var(--dur-fast), border-color var(--dur-fast), transform var(--dur-fast);
+}
+.tile:hover { border-color: var(--control-border); }
+.tile:active { transform: scale(.98); }
+.tile.active { border-color: var(--accent-fill); box-shadow: 0 0 0 1px var(--accent-fill); background: color-mix(in srgb, var(--accent-fill) 6%, var(--bg-surface)); font-weight: 600; }
+.tile-art { width: 40px; height: 80px; image-rendering: pixelated; }
+.tile-grid#cz-capes .tile-art { width: 40px; height: 64px; border-radius: 2px; }
+.tile-empty .tile-art { opacity: .55; }
+#cz-capes .tile-empty .tile-art { border: 1px dashed var(--control-border); }
+.tile-upload { justify-content: center; color: var(--accent); border-style: dashed; }
+.tile-upload .icon { width: 24px; height: 24px; }
+.tile-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+
+.visibility-note { display: flex; align-items: flex-start; gap: var(--space-2); margin-top: var(--space-3); font: var(--type-footnote); color: var(--label-2); max-width: 60ch; }
+.visibility-note .icon { width: 14px; height: 14px; margin-top: 1px; flex-shrink: 0; }
+
+@container content (min-width: 880px) {
+  .customize-layout { grid-template-columns: minmax(300px, 380px) minmax(0, 1fr); align-items: start; }
+  .preview-card { position: sticky; top: 0; }
+}
+@media (forced-colors: active) {
+  .tile.active { outline: 2px solid Highlight; }
+}

@@ -32,6 +32,12 @@ pub struct Settings {
     pub keep_open: bool,
     /// Interface theme: "system" follows Windows, "dark", or "oled" (pure black).
     pub theme: String,
+    /// Skin picked on the Customize page: "default" (the game's own), a preset id, or "custom".
+    pub skin: String,
+    /// Arm width of the skin: "classic" (4 px) or "slim" (3 px).
+    pub skin_model: String,
+    /// Cape picked on the Customize page: "none", a preset id, or "custom".
+    pub cape: String,
 }
 
 impl Default for Settings {
@@ -48,6 +54,9 @@ impl Default for Settings {
             auto_update: true,
             keep_open: true,
             theme: "system".into(),
+            skin: "default".into(),
+            skin_model: "classic".into(),
+            cape: "none".into(),
         }
     }
 }
@@ -115,6 +124,13 @@ impl Settings {
         }
         if !matches!(self.theme.as_str(), "system" | "dark" | "oled") {
             return Err(friendly("Check the theme", "Pick Automatic, Dark or OLED as the interface theme."));
+        }
+        if !matches!(self.skin_model.as_str(), "classic" | "slim") {
+            return Err(friendly("Check the skin model", "Pick Classic or Slim arms for your skin."));
+        }
+        let id_ok = |s: &str| !s.is_empty() && s.len() <= 32 && s.chars().all(|c| c.is_ascii_alphanumeric() || c == '-');
+        if !id_ok(&self.skin) || !id_ok(&self.cape) {
+            return Err(friendly("Check your skin and cape", "Pick a skin and a cape again on the Customize page."));
         }
         let java = self.java_path.trim();
         if !java.is_empty() && !Path::new(java).is_file() {
