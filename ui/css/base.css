@@ -47,7 +47,8 @@ h1, h2, h3, h4, p { margin: 0; }
 }
 html.mica .content { background: var(--bg-canvas-mica); }
 
-.page { display: none; max-width: var(--page-width); }
+.content { container-type: inline-size; container-name: content; }
+.page { display: none; max-width: var(--page-width); margin-inline: auto; }
 .page.active { display: block; animation: page-in var(--dur-base) var(--ease); }
 @keyframes page-in { from { opacity: 0; } to { opacity: 1; } }
 
@@ -56,7 +57,7 @@ html.mica .content { background: var(--bg-canvas-mica); }
 .page-title { font: var(--type-large-title); letter-spacing: -.01em; }
 .page-subtitle { font: var(--type-body); color: var(--label-2); margin-top: var(--space-1); max-width: 60ch; }
 
-.section-header { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); margin: var(--space-6) 0 var(--space-2); padding: 0 var(--space-1); }
+.section-header { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); min-height: var(--control-height); margin: var(--space-6) 0 var(--space-2); padding: 0 var(--space-1); }
 .section-title { font: var(--type-headline); }
 
 .fineprint { font: var(--type-footnote); color: var(--label-3); margin-top: var(--space-5); max-width: 64ch; }

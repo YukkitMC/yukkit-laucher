@@ -226,7 +226,7 @@ function renderButton() {
 function renderNews() {
   const o = state.overview;
   const box = $("news");
-  const list = (state.notes || []).slice(0, 3);
+  const list = (state.notes || []).slice(0, 5); // 3 shown in a narrow window, 5 when wide (play.css)
   if (!list.length) {
     box.innerHTML = `<div class="news-empty">${o && o.error ? "News shows up here when you're online." : "Loading news…"}</div>`;
     return;

@@ -49,3 +49,41 @@
 .news-meta { font: var(--type-footnote); color: var(--label-2); margin-top: 2px; }
 .news-empty { padding: var(--space-4); color: var(--label-2); }
 .news-row .row-subtitle { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ---------- Wide windows (maximized / full screen) ----------
+ * The page grows with the window instead of leaving it empty: the play card becomes a
+ * full-width band, ready check and releases sit side by side, the fine print sinks to the bottom. */
+#page-play { max-width: 1600px; }
+#page-play.active { display: flex; flex-direction: column; min-height: 100%; }
+#page-play .fineprint { margin-top: auto; padding-top: var(--space-5); }
+.play-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 var(--space-5); }
+.news-row:nth-child(n + 4) { display: none; }
+
+@container content (min-width: 1040px) {
+  .play-layout { grid-template-columns: minmax(0, 1.25fr) minmax(320px, 1fr); grid-template-areas: "card card" "main side"; align-items: start; }
+  .play-card { grid-area: card; }
+  .play-main { grid-area: main; }
+  .play-side { grid-area: side; }
+  .play-side .section-header:first-child { margin-top: var(--space-6); }
+
+  /* Brand color lives in the content layer: a quiet tint of the logo blue behind the play band */
+  .play-card {
+    background: color-mix(in srgb, var(--accent-fill) 7%, var(--bg-surface));
+    border-color: color-mix(in srgb, var(--accent-fill) 22%, var(--separator));
+  }
+  .play-header .page-title { font-size: 2.5rem; line-height: 3rem; }
+  .play-header .page-subtitle { font-size: 1rem; line-height: 1.5rem; }
+  .play-row { padding: var(--space-5) var(--space-6); }
+  .play-meta { gap: var(--space-3); }
+  .play-btn { min-width: 280px; min-height: 64px; padding-inline: var(--space-5) var(--space-6); border-radius: var(--radius-large); }
+  .play-btn .icon.lg { width: 24px; height: 24px; }
+  .play-label { font-size: 1.25rem; line-height: 1.75rem; }
+  .play-sub { font-size: .8125rem; }
+  .news-row:nth-child(n + 4) { display: flex; }
+  .play-side .news-row .row-subtitle { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+}
+@container content (min-width: 1400px) {
+  .play-header .page-title { font-size: 3rem; line-height: 3.5rem; }
+  .play-row { padding: var(--space-6) var(--space-7); }
+  .play-btn { min-width: 320px; min-height: 72px; }
+}
