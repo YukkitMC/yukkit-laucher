@@ -4,7 +4,6 @@
 .setting { min-height: 56px; gap: var(--space-4); }
 .setting label.row-title { display: block; }
 .setting .row-subtitle { max-width: 46ch; }
-.setting-value { font: var(--type-body); color: var(--label-2); margin-left: var(--space-1); font-variant-numeric: tabular-nums; }
 .setting-control { flex-shrink: 0; display: flex; align-items: center; gap: var(--space-2); }
 .setting-path { font: var(--type-mono); color: var(--label); user-select: text; word-break: break-all; margin-top: var(--space-1); }
 .inline-input { display: flex; gap: var(--space-2); margin-top: var(--space-3); }
@@ -15,4 +14,51 @@
 @media (max-width: 1040px) {
   .setting.stack { flex-wrap: wrap; }
   .setting.stack .row-main { flex-basis: 100%; }
+}
+
+/* ---------- Player name: avatar preview + field + live hint ---------- */
+.profile-row { align-items: flex-start; gap: var(--space-4); padding: var(--space-4); }
+.avatar-lg { width: 48px; height: 48px; font: 600 1.25rem/1 var(--font-display); margin-top: var(--space-1); }
+.profile-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+.name-field {
+  display: flex; align-items: center; gap: var(--space-2);
+  max-width: 420px; height: 40px; padding: 0 var(--space-3);
+  background: var(--fill-control); border: 1px solid var(--control-border); border-radius: var(--radius-group);
+  transition: border-color var(--dur-fast), box-shadow var(--dur-fast);
+}
+.name-field:hover { border-color: var(--label-2); }
+.name-field:focus-within { border-color: var(--focus-ring); box-shadow: 0 0 0 1px var(--focus-ring); }
+.name-field.valid:not(:focus-within) { border-color: color-mix(in srgb, var(--ok) 60%, var(--control-border)); }
+.name-field.invalid, .name-field.invalid:focus-within { border-color: var(--danger); box-shadow: 0 0 0 1px var(--danger); }
+.name-field input {
+  flex: 1; min-width: 0; height: 100%; padding: 0; border: 0; background: transparent; outline: none;
+  color: var(--label); font: 600 1rem/1 var(--font-text); user-select: text;
+}
+.name-count { font: var(--type-footnote); color: var(--label-2); font-variant-numeric: tabular-nums; }
+.name-hint { display: flex; align-items: flex-start; gap: var(--space-1); font: var(--type-callout); color: var(--label-2); }
+.name-hint .icon { margin-top: 1px; }
+.name-hint.ok { color: var(--ok); }
+.name-hint.error { color: var(--danger); }
+
+/* ---------- Memory: value, slider, GB scale ---------- */
+.memory-row { align-items: center; }
+.memory-control { width: 300px; flex-shrink: 0; display: grid; grid-template-columns: 1fr; gap: var(--space-1); }
+.memory-value {
+  justify-self: end; font: 600 1.125rem/1.5rem var(--font-display); color: var(--label);
+  font-variant-numeric: tabular-nums;
+}
+.slider-ticks { position: relative; height: 1rem; margin: 0 11px; }
+.slider-ticks span {
+  position: absolute; left: var(--at); transform: translateX(-50%);
+  font: var(--type-footnote); color: var(--label-2); white-space: nowrap; font-variant-numeric: tabular-nums;
+}
+.slider-ticks span:last-child { transform: translateX(-80%); }
+.slider-ticks .recommended { color: var(--accent); font-weight: 600; }
+.slider-ticks .recommended::before {
+  content: ""; position: absolute; left: 50%; top: -9px; width: 1px; height: 5px; background: currentColor;
+}
+@media (max-width: 1040px) {
+  .memory-row { flex-wrap: wrap; }
+  .memory-row .row-main { flex-basis: 100%; }
+  .memory-control { width: 100%; }
 }

@@ -222,12 +222,20 @@
 
       <h2 class="section-header section-title settings-group-title">Account</h2>
       <div class="group">
-        <div class="group-row setting">
-          <div class="row-main">
+        <div class="group-row profile-row">
+          <span class="avatar avatar-lg" id="s-name-avatar" aria-hidden="true">P</span>
+          <div class="profile-main">
             <label class="row-title" for="s-username">Player name</label>
-            <p class="row-subtitle" id="s-username-desc">What other players see. 3–16 letters, numbers or underscores.</p>
+            <div class="name-field" id="s-name-box">
+              <input id="s-username" maxlength="16" spellcheck="false" autocomplete="off"
+                     aria-describedby="s-username-hint s-username-count" />
+              <span class="name-count" id="s-username-count" aria-live="off">0/16</span>
+            </div>
+            <p class="name-hint" id="s-username-hint">
+              <svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>
+              <span id="s-username-hint-text">What other players see. 3–16 letters, numbers or underscores.</span>
+            </p>
           </div>
-          <input class="field" id="s-username" maxlength="16" spellcheck="false" aria-describedby="s-username-desc" />
         </div>
       </div>
 
@@ -254,12 +262,22 @@
 
       <h2 class="section-header section-title settings-group-title">Game</h2>
       <div class="group">
-        <div class="group-row setting">
+        <div class="group-row setting memory-row">
           <div class="row-main">
-            <label class="row-title" for="s-memory">Memory <span class="setting-value" id="s-memory-label"></span></label>
+            <label class="row-title" for="s-memory">Memory</label>
             <p class="row-subtitle" id="s-memory-desc">4 GB suits most computers. More isn't always faster.</p>
           </div>
-          <input type="range" id="s-memory" min="1024" max="16384" step="512" aria-describedby="s-memory-desc" />
+          <div class="memory-control">
+            <output class="memory-value" id="s-memory-label" for="s-memory">4 GB</output>
+            <input type="range" class="slider" id="s-memory" min="1024" max="16384" step="512" aria-describedby="s-memory-desc" />
+            <div class="slider-ticks" aria-hidden="true">
+              <span style="--at: 0%">1</span>
+              <span class="recommended" style="--at: 20%">4</span>
+              <span style="--at: 46.667%">8</span>
+              <span style="--at: 73.333%">12</span>
+              <span style="--at: 100%">16 GB</span>
+            </div>
+          </div>
         </div>
         <div class="group-row setting">
           <div class="row-main">

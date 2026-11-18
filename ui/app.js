@@ -575,8 +575,11 @@ function segValue(id) {
 function memLabel() {
   const mb = Number($("s-memory").value);
   const text = `${(mb / 1024).toFixed(mb % 1024 ? 1 : 0)} GB`;
+  const el = $("s-memory");
   $("s-memory-label").textContent = text;
-  $("s-memory").setAttribute("aria-valuetext", text);
+  el.setAttribute("aria-valuetext", text);
+  // Filled part of the track follows the thumb.
+  el.style.setProperty("--pct", `${((mb - el.min) / (el.max - el.min)) * 100}%`);
 }
 
 async function loadSettings() {
@@ -586,6 +589,7 @@ async function loadSettings() {
   state.defaultInstallDir = view.defaultInstallDir;
   $("launcher-version").textContent = `Launcher ${view.version}`;
   $("s-username").value = s.username;
+  nameFeedback();
   $("s-auto").checked = s.autoUpdate;
   setSeg("s-channel", s.previews ? "preview" : "stable");
   $("s-memory").value = s.memoryMb;
@@ -615,7 +619,32 @@ async function saveSettings(patch, quietToast) {
   }
 }
 
-$("s-username").onchange = (e) => saveSettings({ username: e.target.value.trim() });
+/* Player name: live feedback while typing; saves only a name the game accepts. */
+const NAME_RULE = /^[A-Za-z0-9_]{3,16}$/;
+const NAME_HELP = "What other players see. 3–16 letters, numbers or underscores.";
+function nameFeedback() {
+  const v = $("s-username").value.trim();
+  const valid = NAME_RULE.test(v);
+  const bad = v.length > 0 && /[^A-Za-z0-9_]/.test(v);
+  $("s-username-count").textContent = `${v.length}/16`;
+  $("s-name-avatar").textContent = (v || "P")[0].toUpperCase();
+  let kind = "info", msg = NAME_HELP;
+  if (bad) { kind = "error"; msg = "Only letters, numbers and underscores. No spaces or symbols."; }
+  else if (v.length && v.length < 3) { kind = "error"; msg = `Add ${3 - v.length} more ${3 - v.length === 1 ? "character" : "characters"}. Names need at least 3.`; }
+  else if (valid) { kind = "ok"; msg = "Looks good. Other players will see this name."; }
+  const box = $("s-name-box");
+  box.classList.toggle("invalid", kind === "error");
+  box.classList.toggle("valid", kind === "ok");
+  $("s-username").setAttribute("aria-invalid", String(kind === "error"));
+  const hint = $("s-username-hint");
+  hint.className = `name-hint ${kind}`;
+  hint.querySelector("use").setAttribute("href", kind === "ok" ? "#i-check-circle" : kind === "error" ? "#i-alert" : "#i-info");
+  $("s-username-hint-text").textContent = msg;
+  return valid;
+}
+$("s-username").oninput = nameFeedback;
+$("s-username").onkeydown = (e) => { if (e.key === "Enter") e.target.blur(); };
+$("s-username").onchange = (e) => { if (nameFeedback()) saveSettings({ username: e.target.value.trim() }); };
 $("s-auto").onchange = (e) => saveSettings({ autoUpdate: e.target.checked });
 $("s-memory").oninput = memLabel;
 $("s-memory").onchange = (e) => saveSettings({ memoryMb: Number(e.target.value) });
