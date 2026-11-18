@@ -102,7 +102,7 @@ function toast(text) {
 /* ---------- Notices (plain-English errors) ---------- */
 function normalizeError(err) {
   if (err && typeof err === "object" && err.title) return err;
-  return { title: "Something went wrong", message: String(err), details: String(err) };
+  return { title: t("Something went wrong"), message: String(err), details: String(err) };
 }
 function showError(err, retry, { info = false } = {}) {
   const e = normalizeError(err);
@@ -133,7 +133,7 @@ $("notice-copy").onclick = async () => {
   const e = state.lastError;
   if (!e) return;
   await navigator.clipboard.writeText(`${e.title}\n${e.message}\n\n${e.details}`).catch(() => {});
-  toast("Copied");
+  toast(t("Copied"));
 };
 
 /* ---------- Play page ---------- */
@@ -151,7 +151,7 @@ function setRow(id, ready, text) {
   icon.querySelector("use").setAttribute("href", ready ? "#i-check-circle" : "#i-down-circle");
   const s = row.querySelector(".row-state");
   s.className = "status row-state " + (ready ? "ok" : "caution");
-  s.textContent = ready ? "Ready" : "Will be installed";
+  s.textContent = ready ? t("Ready") : t("Will be installed");
 }
 const statusLabel = (kind, text) =>
   `<span class="status ${kind}"><svg class="icon" aria-hidden="true"><use href="#i-${kind === "ok" ? "check-circle" : "down-circle"}"/></svg>${text}</span>`;
@@ -173,38 +173,38 @@ function renderPlay() {
   sel.disabled = state.busy;
 
   if (!v) {
-    $("play-eyebrow").textContent = "No versions available";
-    $("play-lede").textContent = "The launcher couldn't find any game versions to offer.";
+    $("play-eyebrow").textContent = t("No versions available");
+    $("play-lede").textContent = t("The launcher couldn't find any game versions to offer.");
     renderButton();
     return;
   }
 
   const ready = v.installed && v.checks.java && v.checks.minecraft && v.checks.toolkit;
   const status = !v.installed
-    ? statusLabel("caution", "Not installed yet")
+    ? statusLabel("caution", t("Not installed yet"))
     : !ready
-      ? statusLabel("caution", "Needs repair")
+      ? statusLabel("caution", t("Needs repair"))
       : o.updateAvailable
-        ? statusLabel("caution", "Update available")
-        : statusLabel("ok", "Ready to play");
+        ? statusLabel("caution", t("Update available"))
+        : statusLabel("ok", t("Ready to play"));
   $("play-eyebrow").innerHTML = `<span>Minecraft ${esc(v.minecraft)}</span><span aria-hidden="true">·</span>${status}`;
 
   const tag = v.installed ? v.installed.toolkitTag : o.latest ? o.latest.tag : "";
-  $("play-lede").textContent = `${tag ? tag + " · " : ""}${v.description || "Yukkit Toolkit on Fabric."}`;
+  $("play-lede").textContent = `${tag ? tag + " · " : ""}${v.description || t("Yukkit Toolkit on Fabric.")}`;
 
   const upd = $("update-line");
   if (o.updateAvailable && o.latest) {
     upd.classList.remove("hidden");
-    $("update-text").textContent = `${o.latest.tag} is out. It installs when you press Play.`;
+    $("update-text").textContent = t("{tag} is out. It installs when you press Play.", { tag: o.latest.tag });
   } else {
     upd.classList.add("hidden");
   }
 
-  setRow("row-java", v.checks.java, v.checks.java ? "Installed and ready." : "Downloaded for you the first time you play.");
+  setRow("row-java", v.checks.java, v.checks.java ? t("Installed and ready.") : t("Downloaded for you the first time you play."));
   setRow("row-minecraft", v.checks.minecraft,
-    v.checks.minecraft ? `Minecraft ${v.minecraft} with the Fabric mod loader.` : `Minecraft ${v.minecraft} and Fabric, about 600 MB the first time.`);
+    v.checks.minecraft ? t("Minecraft {v} with the Fabric mod loader.", { v: v.minecraft }) : t("Minecraft {v} and Fabric, about 600 MB the first time.", { v: v.minecraft }));
   setRow("row-toolkit", v.checks.toolkit,
-    v.checks.toolkit ? `${v.installed.toolkitTag} with Fabric API ${v.installed.fabricApi}.` : o.latest ? `${o.latest.tag} from GitHub.` : "The newest build from GitHub.");
+    v.checks.toolkit ? t("{tag} with Fabric API {api}.", { tag: v.installed.toolkitTag, api: v.installed.fabricApi }) : o.latest ? t("{tag} from GitHub.", { tag: o.latest.tag }) : t("The newest build from GitHub."));
 
   renderButton();
 }
@@ -219,24 +219,24 @@ function renderButton() {
     btn.disabled = true;
     btn.classList.add("running");
     btn.querySelector(".icon use").setAttribute("href", "#i-check-circle");
-    $("play-label").textContent = "Playing";
-    $("play-sub").textContent = "Close the game to play again";
+    $("play-label").textContent = t("Playing");
+    $("play-sub").textContent = t("Close the game to play again");
     return;
   }
   if (state.busy) {
     btn.disabled = true;
-    $("play-label").textContent = "Preparing…";
-    $("play-sub").textContent = "This can take a few minutes";
+    $("play-label").textContent = t("Preparing…");
+    $("play-sub").textContent = t("This can take a few minutes");
     return;
   }
   btn.disabled = !v;
-  if (!v) { $("play-label").textContent = "Play"; $("play-sub").textContent = "Nothing to play yet"; return; }
+  if (!v) { $("play-label").textContent = t("Play"); $("play-sub").textContent = t("Nothing to play yet"); return; }
   const ready = v.installed && v.checks.java && v.checks.minecraft && v.checks.toolkit;
-  $("play-label").textContent = `Play ${v.minecraft}`;
+  $("play-label").textContent = t("Play {v}", { v: v.minecraft });
   $("play-sub").textContent = !v.installed
-    ? "Installs first, about 600 MB"
-    : !ready ? "Repairs missing files first"
-    : o.updateAvailable ? "Updates first" : "Ready to launch";
+    ? t("Installs first, about 600 MB")
+    : !ready ? t("Repairs missing files first")
+    : o.updateAvailable ? t("Updates first") : t("Ready to launch");
 }
 
 function renderNews() {
@@ -244,7 +244,7 @@ function renderNews() {
   const box = $("news");
   const list = (state.notes || []).slice(0, 5); // 3 shown in a narrow window, 5 when wide (play.css)
   if (!list.length) {
-    box.innerHTML = `<div class="news-empty">${o && o.error ? "News shows up here when you're online." : "Loading news…"}</div>`;
+    box.innerHTML = `<div class="news-empty">${o && o.error ? t("News shows up here when you're online.") : t("Loading news…")}</div>`;
     return;
   }
   box.innerHTML = list
@@ -253,7 +253,7 @@ function renderNews() {
         <div class="row-main">
           <div class="row-title">${esc(shortTitle(r.title))}</div>
           <div class="row-subtitle">${esc(firstLine(r.notes))}</div>
-          <div class="news-meta">${esc(formatDate(r.date))}${r.prerelease ? " · Preview" : ""}</div>
+          <div class="news-meta">${esc(formatDate(r.date))}${r.prerelease ? " · " + t("Preview") : ""}</div>
         </div>
         <svg class="icon row-chevron" aria-hidden="true"><use href="#i-chevron-right"/></svg>
       </button>`)
@@ -296,11 +296,11 @@ async function play() {
   if (!v) return;
   state.busy = true;
   hideError();
-  setProgress({ step: 1, steps: 6, title: "Getting ready", detail: "", fraction: null });
+  setProgress({ step: 1, steps: 6, title: t("Getting ready"), detail: "", fraction: null });
   renderPlay();
   try {
     await invoke("play", { versionId: v.id });
-    toast("Starting Minecraft. The game window opens in a moment.");
+    toast(t("Starting Minecraft. The game window opens in a moment."));
   } catch (e) {
     showError(e, play);
   } finally {
@@ -314,21 +314,21 @@ $("play-btn").onclick = play;
 function setProgress(p) {
   $("progress").classList.remove("hidden");
   $("progress-title").textContent = p.title;
-  $("progress-step").textContent = `Step ${p.step} of ${p.steps}`;
+  $("progress-step").textContent = t("Step {n} of {m}", { n: p.step, m: p.steps });
   $("progress-detail").textContent = p.detail || "";
   const fill = $("progress-fill");
   const bar = $("progress-bar");
   if (p.fraction === null || p.fraction === undefined) {
     fill.classList.add("indeterminate");
     bar.removeAttribute("aria-valuenow");
-    bar.setAttribute("aria-valuetext", `Step ${p.step} of ${p.steps}`);
+    bar.setAttribute("aria-valuetext", t("Step {n} of {m}", { n: p.step, m: p.steps }));
   } else {
     fill.classList.remove("indeterminate");
     const overall = (p.step - 1 + Math.min(1, Math.max(0, p.fraction))) / p.steps;
     const pct = Math.round(overall * 100);
     fill.style.width = `${pct}%`;
     bar.setAttribute("aria-valuenow", String(pct));
-    bar.setAttribute("aria-valuetext", `${pct}%, step ${p.step} of ${p.steps}`);
+    bar.setAttribute("aria-valuetext", `${pct}%, ` + t("Step {n} of {m}", { n: p.step, m: p.steps }));
   }
 }
 
@@ -336,23 +336,23 @@ function setProgress(p) {
 function renderVersions() {
   const o = state.overview;
   const list = $("version-list");
-  if (!o || !o.versions.length) { list.innerHTML = `<p class="list-empty">No versions yet.</p>`; return; }
+  if (!o || !o.versions.length) { list.innerHTML = `<p class="list-empty">${t("No versions yet.")}</p>`; return; }
   list.innerHTML = o.versions
     .map((v) => {
       const inUse = v.id === o.selected;
       const badges = [
         v.channel ? `<span class="badge caution">${esc(v.channel)}</span>` : "",
-        v.installed ? `<span class="badge">Installed</span>` : "",
+        v.installed ? `<span class="badge">${t("Installed")}</span>` : "",
       ].join("");
       const meta = [
         `Minecraft ${esc(v.minecraft)}`,
         "Fabric",
-        v.installed ? `Toolkit ${esc(v.installed.toolkitTag)}` : "Not installed",
+        v.installed ? `Toolkit ${esc(v.installed.toolkitTag)}` : t("Not installed"),
       ].join(" · ");
       const actions = [
         inUse
-          ? `<span class="in-use"><svg class="icon" aria-hidden="true"><use href="#i-check-circle"/></svg>In use</span>`
-          : `<button class="btn btn-small" data-use="${esc(v.id)}">Use this version</button>`,
+          ? `<span class="in-use"><svg class="icon" aria-hidden="true"><use href="#i-check-circle"/></svg>${t("In use")}</span>`
+          : `<button class="btn btn-small" data-use="${esc(v.id)}">${t("Use this version")}</button>`,
         v.installed
           ? `<button class="btn btn-small btn-quiet btn-danger" data-remove="${esc(v.id)}">Remove</button>`
           : `<button class="btn btn-small btn-primary" data-install="${esc(v.id)}">Install</button>`,
@@ -373,19 +373,19 @@ function renderVersions() {
     await invoke("select_version", { versionId: b.dataset.use }).catch(showError);
     state.notes = null;
     await refresh();
-    toast(`Switched to ${b.dataset.use}`);
+    toast(t("Switched to {v}", { v: b.dataset.use }));
   }));
   list.querySelectorAll("[data-install]").forEach((b) => (b.onclick = () => installVersion(b.dataset.install)));
   list.querySelectorAll("[data-remove]").forEach((b) => (b.onclick = async () => {
     const ok = await confirmSheet({
-      title: `Remove ${b.dataset.remove}?`,
-      text: "The game files for this version are deleted. Your worlds and settings for it are kept.",
-      action: "Remove",
+      title: t("Remove {v}?", { v: b.dataset.remove }),
+      text: t("The game files for this version are deleted. Your worlds and settings for it are kept."),
+      action: t("Remove"),
     });
     if (!ok) return;
     try {
       await invoke("remove_version", { versionId: b.dataset.remove });
-      toast("Removed. Your worlds are still there.");
+      toast(t("Removed. Your worlds are still there."));
       refresh();
     } catch (e) { showError(e); }
   }));
@@ -398,11 +398,11 @@ async function installVersion(id) {
   state.busy = true;
   hideError();
   await refresh();
-  setProgress({ step: 1, steps: 6, title: "Getting ready", detail: "", fraction: null });
+  setProgress({ step: 1, steps: 6, title: t("Getting ready"), detail: "", fraction: null });
   renderButton();
   try {
     await invoke("install", { versionId: id });
-    toast("Installed. Press Play when you're ready.");
+    toast(t("Installed. Press Play when you're ready."));
   } catch (e) {
     showError(e, () => installVersion(id));
   } finally {
@@ -419,7 +419,7 @@ async function loadNotes(quiet) {
       state.notes = await invoke("get_patch_notes");
     } catch (e) {
       if (!quiet) {
-        $("notes").innerHTML = `<p class="notes-empty">Patch notes need an internet connection. ${esc(normalizeError(e).message)}</p>`;
+        $("notes").innerHTML = `<p class="notes-empty">${t("Patch notes need an internet connection.")} ${esc(normalizeError(e).message)}</p>`;
         $("notes-pager").classList.add("hidden");
         $("notes-count").textContent = "";
       }
@@ -449,7 +449,7 @@ function renderNotes() {
   const count = $("notes-count");
   if (!state.notes) return;
   if (!state.notes.length) {
-    box.innerHTML = `<p class="notes-empty">No releases yet.</p>`;
+    box.innerHTML = `<p class="notes-empty">${t("No releases yet.")}</p>`;
     pager.classList.add("hidden");
     count.textContent = "";
     return;
@@ -462,15 +462,15 @@ function renderNotes() {
 
   const q = state.notesQuery.trim();
   count.textContent = q
-    ? `${hits.length} ${hits.length === 1 ? "release matches" : "releases match"} "${q}"`
-    : `${hits.length} ${hits.length === 1 ? "release" : "releases"}`;
+    ? t(hits.length === 1 ? "{n} release matches \"{q}\"" : "{n} releases match \"{q}\"", { n: hits.length, q })
+    : t(hits.length === 1 ? "{n} release" : "{n} releases", { n: hits.length });
 
   if (!hits.length) {
     box.innerHTML = `
       <div class="notes-empty-state">
-        <p class="notes-empty-title">No release mentions "${esc(q)}"</p>
-        <p class="notes-empty">Try a module name, a version such as alpha.3, or a shorter word.</p>
-        <button class="btn btn-small" id="notes-clear">Clear search</button>
+        <p class="notes-empty-title">${esc(t("No release mentions \"{q}\"", { q }))}</p>
+        <p class="notes-empty">${t("Try a module name, a version such as alpha.3, or a shorter word.")}</p>
+        <button class="btn btn-small" id="notes-clear">${t("Clear search")}</button>
       </div>`;
     $("notes-clear").onclick = () => { setNotesQuery(""); $("notes-search").focus(); };
     pager.classList.add("hidden");
@@ -485,7 +485,7 @@ function renderNotes() {
           <span class="release-meta">${esc(r.tag)} · ${esc(formatDate(r.date))}</span>
         </div>
         <div class="md">${markdown(r.notes)}</div>
-        <button class="link" data-release="${i}">Open on GitHub<svg class="icon" aria-hidden="true"><use href="#i-arrow-up-right"/></svg></button>
+        <button class="link" data-release="${i}">${t("Open on GitHub")}<svg class="icon" aria-hidden="true"><use href="#i-arrow-up-right"/></svg></button>
       </article>`)
     .join("");
   box.querySelectorAll("[data-release]").forEach((b) => (b.onclick = () => openLink(state.notes[b.dataset.release].url)));
@@ -503,12 +503,12 @@ function renderPager(pages) {
   const items = [];
   nums.forEach((n, k) => {
     if (k && n - nums[k - 1] > 1) items.push(`<span class="pager-gap" aria-hidden="true">…</span>`);
-    items.push(`<button class="pager-num" data-page-n="${n}" ${n === cur ? 'aria-current="page"' : ""} aria-label="Page ${n} of ${pages}">${n}</button>`);
+    items.push(`<button class="pager-num" data-page-n="${n}" ${n === cur ? 'aria-current="page"' : ""} aria-label="${t("Page {n} of {m}", { n, m: pages })}">${n}</button>`);
   });
   pager.innerHTML = `
-    <button class="btn btn-small btn-quiet" data-page-n="${cur - 1}" ${cur === 1 ? "disabled" : ""}><svg class="icon" aria-hidden="true"><use href="#i-chevron-left"/></svg>Newer</button>
+    <button class="btn btn-small btn-quiet" data-page-n="${cur - 1}" ${cur === 1 ? "disabled" : ""}><svg class="icon" aria-hidden="true"><use href="#i-chevron-left"/></svg>${t("Newer")}</button>
     <div class="pager-nums">${items.join("")}</div>
-    <button class="btn btn-small btn-quiet" data-page-n="${cur + 1}" ${cur === pages ? "disabled" : ""}>Older<svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></button>`;
+    <button class="btn btn-small btn-quiet" data-page-n="${cur + 1}" ${cur === pages ? "disabled" : ""}>${t("Older")}<svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></button>`;
   pager.querySelectorAll("[data-page-n]").forEach((b) => (b.onclick = () => goToNotesPage(Number(b.dataset.pageN))));
 }
 
@@ -603,7 +603,12 @@ async function loadSettings() {
   const s = view.settings;
   state.settings = s;
   state.defaultInstallDir = view.defaultInstallDir;
-  $("launcher-version").textContent = `Launcher ${view.version}`;
+  state.launcherVersion = view.version;
+  $("launcher-version").textContent = t("Launcher {v}", { v: view.version });
+  $("s-language").value = s.language || "";
+  let cached = "";
+  try { cached = localStorage.getItem("yukkit-language") || ""; } catch {}
+  if ((s.language || "") !== cached) I18n.setLanguage(s.language || "");
   $("s-username").value = s.username;
   $("cz-nametag").textContent = s.username;
   nameFeedback();
@@ -628,7 +633,7 @@ async function saveSettings(patch, quietToast) {
   try {
     await invoke("save_settings", { settings: next });
     state.settings = next;
-    if (!quietToast) toast("Saved");
+    if (!quietToast) toast(t("Saved"));
     if ("username" in patch || "previews" in patch || "installDir" in patch || "javaPath" in patch) refresh();
     return true;
   } catch (e) {
@@ -640,7 +645,6 @@ async function saveSettings(patch, quietToast) {
 
 /* Player name: live feedback while typing; saves only a name the game accepts. */
 const NAME_RULE = /^[A-Za-z0-9_]{3,16}$/;
-const NAME_HELP = "What other players see. 3–16 letters, numbers or underscores.";
 function nameFeedback() {
   const v = $("s-username").value.trim();
   const valid = NAME_RULE.test(v);
@@ -648,10 +652,10 @@ function nameFeedback() {
   $("s-username-count").textContent = `${v.length}/16`;
   $("s-name-avatar").textContent = (v || "P")[0].toUpperCase();
   if (valid) $("cz-nametag").textContent = v;
-  let kind = "info", msg = NAME_HELP;
-  if (bad) { kind = "error"; msg = "Only letters, numbers and underscores. No spaces or symbols."; }
-  else if (v.length && v.length < 3) { kind = "error"; msg = `Add ${3 - v.length} more ${3 - v.length === 1 ? "character" : "characters"}. Names need at least 3.`; }
-  else if (valid) { kind = "ok"; msg = "Looks good. Other players will see this name."; }
+  let kind = "info", msg = t("What other players see. 3–16 letters, numbers or underscores.");
+  if (bad) { kind = "error"; msg = t("Only letters, numbers and underscores. No spaces or symbols."); }
+  else if (v.length && v.length < 3) { kind = "error"; msg = t(3 - v.length === 1 ? "Add 1 more character. Names need at least 3." : "Add {n} more characters. Names need at least 3.", { n: 3 - v.length }); }
+  else if (valid) { kind = "ok"; msg = t("Looks good. Other players will see this name."); }
   const box = $("s-name-box");
   box.classList.toggle("invalid", kind === "error");
   box.classList.toggle("valid", kind === "ok");
@@ -677,6 +681,23 @@ $("s-channel").querySelectorAll("button").forEach((b) => (b.onclick = () => {
   state.notes = null;
   saveSettings({ previews: b.dataset.value === "preview" });
 }));
+$("s-language").onchange = async (e) => {
+  if (await saveSettings({ language: e.target.value }, true)) {
+    I18n.setLanguage(e.target.value);
+    toast(t("Saved"));
+  }
+};
+// Text that app.js writes is rebuilt in the new language; static text is handled by I18n.
+document.addEventListener("yukkit:language", () => {
+  renderPlay();
+  renderVersions();
+  renderNotes();
+  renderNews();
+  if (cz.loaded) renderPickers();
+  if (state.settings) { nameFeedback(); memLabel(); }
+  if (state.launcherVersion) $("launcher-version").textContent = t("Launcher {v}", { v: state.launcherVersion });
+  if ($("page-logs").classList.contains("active")) renderLog();
+});
 $("s-theme").querySelectorAll("button").forEach((b) => (b.onclick = () => {
   setSeg("s-theme", b.dataset.value);
   applyTheme(b.dataset.value);
@@ -766,15 +787,15 @@ function renderPickers() {
   const s = state.settings;
   const skins = $("cz-skins");
   skins.replaceChildren(
-    tile("skin", "default", "Default", null),
-    ...Cosmetics.SKINS.map((p) => tile("skin", p.id, p.name, cz.skin.get(p.id))),
-    tile("skin", "custom", cz.customSkin ? "Your skin" : "Upload…", cz.customSkin),
+    tile("skin", "default", t("Default"), null),
+    ...Cosmetics.SKINS.map((p) => tile("skin", p.id, t(p.name), cz.skin.get(p.id))),
+    tile("skin", "custom", cz.customSkin ? t("Your skin") : t("Upload…"), cz.customSkin),
   );
   const capes = $("cz-capes");
   capes.replaceChildren(
-    tile("cape", "none", "No cape", null),
-    ...Cosmetics.CAPES.map((p) => tile("cape", p.id, p.name, cz.cape.get(p.id))),
-    tile("cape", "custom", cz.customCape ? "Your cape" : "Upload…", cz.customCape),
+    tile("cape", "none", t("No cape"), null),
+    ...Cosmetics.CAPES.map((p) => tile("cape", p.id, t(p.name), cz.cape.get(p.id))),
+    tile("cape", "custom", cz.customCape ? t("Your cape") : t("Upload…"), cz.customCape),
   );
   setSeg("cz-skins", s.skin || "default");
   setSeg("cz-capes", s.cape || "none");
@@ -815,7 +836,7 @@ async function chooseCosmetic(kind, id) {
     await invoke("set_cosmetic", { kind, png: await activePng(kind, id) });
     if (await saveSettings({ [key]: id }, true)) {
       renderPreview();
-      toast(kind === "skin" ? "Skin saved" : id === "none" ? "Cape removed" : "Cape saved");
+      toast(kind === "skin" ? t("Skin saved") : id === "none" ? t("Cape removed") : t("Cape saved"));
     }
   } catch (e) { showError(e); }
 }
@@ -857,10 +878,10 @@ function appendLog(line) {
 }
 function renderLog() {
   const el = $("log");
-  el.textContent = state.log.length ? state.log.join("\n") + "\n" : "Nothing here yet. Press Play and the launcher's steps and the game's output show up here.";
+  el.textContent = state.log.length ? state.log.join("\n") + "\n" : t("Nothing here yet. Press Play and the launcher's steps and the game's output show up here.");
   el.scrollTop = el.scrollHeight;
 }
-$("log-copy").onclick = async () => { await navigator.clipboard.writeText(state.log.join("\n")).catch(() => {}); toast("Log copied"); };
+$("log-copy").onclick = async () => { await navigator.clipboard.writeText(state.log.join("\n")).catch(() => {}); toast(t("Log copied")); };
 $("log-clear").onclick = () => { state.log = []; renderLog(); };
 
 /* ---------- Events from Rust ---------- */
@@ -875,8 +896,8 @@ listen("game-state", (e) => {
     refresh();
     if (code !== null && code !== undefined && code !== 0) {
       showError({
-        title: "Minecraft closed unexpectedly",
-        message: `The game stopped with an error (code ${code}). Try changing the memory in Settings, or look at the Logs page to see what happened right before it closed.`,
+        title: t("Minecraft closed unexpectedly"),
+        message: t("The game stopped with an error (code {code}). Try changing the memory in Settings, or look at the Logs page to see what happened right before it closed.", { code }),
         details: state.log.slice(-40).join("\n"),
       }, play);
       showPage("play");
@@ -891,7 +912,7 @@ function esc(s) {
 function formatDate(iso) {
   if (!iso) return "";
   const d = new Date(iso + "T12:00:00");
-  return isNaN(d) ? iso : d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  return isNaN(d) ? iso : d.toLocaleDateString(I18n.locale(), { year: "numeric", month: "short", day: "numeric" });
 }
 function shortTitle(t) { return String(t || "").replace(/\s*·\s*Minecraft.*$/, ""); }
 function firstLine(md) {
@@ -950,5 +971,6 @@ async function mockInvoke(cmd) {
   }
 }
 
+I18n.translatePage();
 loadSettings().catch(showError);
 refresh();

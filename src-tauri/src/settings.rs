@@ -32,6 +32,8 @@ pub struct Settings {
     pub keep_open: bool,
     /// Interface theme: "system" follows Windows, "dark", or "oled" (pure black).
     pub theme: String,
+    /// Interface language: "" follows Windows, or "en", "pt", "es".
+    pub language: String,
     /// Skin picked on the Customize page: "default" (the game's own), a preset id, or "custom".
     pub skin: String,
     /// Arm width of the skin: "classic" (4 px) or "slim" (3 px).
@@ -54,6 +56,7 @@ impl Default for Settings {
             auto_update: true,
             keep_open: true,
             theme: "system".into(),
+            language: String::new(),
             skin: "default".into(),
             skin_model: "classic".into(),
             cape: "none".into(),
@@ -124,6 +127,9 @@ impl Settings {
         }
         if !matches!(self.theme.as_str(), "system" | "dark" | "oled") {
             return Err(friendly("Check the theme", "Pick Automatic, Dark or OLED as the interface theme."));
+        }
+        if !matches!(self.language.as_str(), "" | "en" | "pt" | "es") {
+            return Err(friendly("Check the language", "Pick English, Português or Español."));
         }
         if !matches!(self.skin_model.as_str(), "classic" | "slim") {
             return Err(friendly("Check the skin model", "Pick Classic or Slim arms for your skin."));

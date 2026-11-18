@@ -124,12 +124,16 @@ The interface is plain HTML, CSS and JavaScript in [`ui/`](ui), with no bundler.
 ui/                     the interface (index.html, app.js)
   css/tokens.css        design tokens: colors (light and dark), type, spacing
   css/*.css             shared controls, then one stylesheet per screen
+  i18n.js               interface language (English, Português, Español)
+  i18n-strings.js       translations, keyed by the English text
+  cosmetics.js          preset skins and capes, character preview
 versions.json           versions the launcher offers
 src-tauri/src/
   main.rs               commands the interface calls
   catalog.rs            version list (versions.json)
   sources.rs            Yukkit Toolkit releases (GitHub) and Fabric API (Modrinth)
   installer.rs          install / update / repair, and the saved launch plan
+  cosmetics.rs          skin and cape files handed to Yukkit Toolkit on Play
   minecraft.rs          Mojang and Fabric profiles, rules, libraries
   java.rs               Java download and detection
   launch.rs             starts the game and streams its logs

@@ -50,7 +50,7 @@
   <aside class="sidebar" aria-label="Sections">
     <div class="brand">
       <img src="img/yukkit.svg" alt="" />
-      <span>Yukkit</span>
+      <span data-no-i18n>Yukkit</span>
     </div>
 
     <nav class="nav">
@@ -65,15 +65,15 @@
     <div class="sidebar-foot">
       <button class="player" id="player-chip" title="Change your name in Settings" aria-describedby="player-mode">
         <span class="avatar" aria-hidden="true">
-          <span id="player-avatar">P</span>
+          <span id="player-avatar" data-no-i18n>P</span>
         </span>
         <span class="player-text">
-          <span class="player-name" id="player-name">Player</span>
+          <span class="player-name" id="player-name" data-no-i18n>Player</span>
           <span class="player-mode" id="player-mode"><svg class="icon" aria-hidden="true"><use href="#i-offline"/></svg>Offline account</span>
         </span>
       </button>
       <div class="foot-row">
-        <span id="launcher-version">Launcher</span>
+        <span id="launcher-version" data-no-i18n>Launcher</span>
         <span class="foot-links">
           <button class="foot-icon" data-href="https://github.com/YukkitMC/yukkit-toolkit" title="Yukkit Toolkit on GitHub" aria-label="Yukkit Toolkit on GitHub">
             <img src="img/yukkit.svg" alt="" />
@@ -90,9 +90,9 @@
     <div class="notice hidden" id="notice" role="alert">
       <svg class="icon lg" aria-hidden="true"><use href="#i-alert"/></svg>
       <div class="notice-body">
-        <div class="notice-title" id="notice-title"></div>
-        <div class="notice-text" id="notice-text"></div>
-        <pre class="notice-details hidden" id="notice-details"></pre>
+        <div class="notice-title" id="notice-title" data-no-i18n></div>
+        <div class="notice-text" id="notice-text" data-no-i18n></div>
+        <pre class="notice-details hidden" id="notice-details" data-no-i18n></pre>
       </div>
       <div class="notice-actions">
         <button class="btn btn-small" id="notice-retry">Try again</button>
@@ -105,12 +105,12 @@
     <!-- PLAY -->
     <section class="page active" id="page-play" aria-labelledby="play-title">
       <header class="play-header">
-        <p class="play-status" id="play-eyebrow">Loading…</p>
+        <p class="play-status" id="play-eyebrow" data-no-i18n>Loading…</p>
         <h1 class="page-title" id="play-title">Yukkit</h1>
-        <p class="page-subtitle" id="play-lede">Getting things ready.</p>
+        <p class="page-subtitle" id="play-lede" data-no-i18n>Getting things ready.</p>
         <p class="update-line hidden" id="update-line">
           <svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>
-          <span id="update-text"></span>
+          <span id="update-text" data-no-i18n></span>
         </p>
       </header>
 
@@ -119,32 +119,32 @@
         <div class="play-row">
           <div class="play-meta">
             <span class="select">
-              <select id="version-select" aria-label="Game version"></select>
+              <select id="version-select" data-no-i18n aria-label="Game version"></select>
               <svg class="icon" aria-hidden="true"><use href="#i-chevron-updown"/></svg>
             </span>
             <div class="playing-as">
-              <span>Playing as <b id="playing-as-name">Player</b></span>
+              <span>Playing as <b id="playing-as-name" data-no-i18n>Player</b></span>
               <button class="link" id="change-name" aria-label="Change player name">Change</button>
             </div>
           </div>
           <button class="play-btn" id="play-btn" disabled aria-describedby="play-sub">
             <svg class="icon lg" aria-hidden="true"><use href="#i-play"/></svg>
             <span class="play-text">
-              <span class="play-label" id="play-label">Play</span>
-              <span class="play-sub" id="play-sub">Please wait</span>
+              <span class="play-label" id="play-label" data-no-i18n>Play</span>
+              <span class="play-sub" id="play-sub" data-no-i18n>Please wait</span>
             </span>
           </button>
         </div>
 
         <div class="progress hidden" id="progress">
           <div class="progress-head">
-            <span class="progress-title" id="progress-title">Getting ready</span>
-            <span class="progress-step" id="progress-step"></span>
+            <span class="progress-title" id="progress-title" data-no-i18n>Getting ready</span>
+            <span class="progress-step" id="progress-step" data-no-i18n></span>
           </div>
           <div class="bar" id="progress-bar" role="progressbar" aria-labelledby="progress-title" aria-valuemin="0" aria-valuemax="100">
             <div class="bar-fill" id="progress-fill"></div>
           </div>
-          <div class="progress-detail" id="progress-detail" aria-live="polite"></div>
+          <div class="progress-detail" id="progress-detail" data-no-i18n aria-live="polite"></div>
         </div>
       </div>
 
@@ -154,18 +154,18 @@
       <div class="group" id="status-rows">
         <div class="group-row with-icon" id="row-java">
           <svg class="icon lg row-icon" aria-hidden="true"><use href="#i-check-circle"/></svg>
-          <div class="row-main"><div class="row-title">Java</div><div class="row-subtitle row-text"></div></div>
-          <span class="status row-state"></span>
+          <div class="row-main"><div class="row-title">Java</div><div class="row-subtitle row-text" data-no-i18n></div></div>
+          <span class="status row-state" data-no-i18n></span>
         </div>
         <div class="group-row with-icon" id="row-minecraft">
           <svg class="icon lg row-icon" aria-hidden="true"><use href="#i-check-circle"/></svg>
-          <div class="row-main"><div class="row-title">Minecraft &amp; Fabric</div><div class="row-subtitle row-text"></div></div>
-          <span class="status row-state"></span>
+          <div class="row-main"><div class="row-title">Minecraft &amp; Fabric</div><div class="row-subtitle row-text" data-no-i18n></div></div>
+          <span class="status row-state" data-no-i18n></span>
         </div>
         <div class="group-row with-icon" id="row-toolkit">
           <svg class="icon lg row-icon" aria-hidden="true"><use href="#i-check-circle"/></svg>
-          <div class="row-main"><div class="row-title">Yukkit Toolkit</div><div class="row-subtitle row-text"></div></div>
-          <span class="status row-state"></span>
+          <div class="row-main"><div class="row-title">Yukkit Toolkit</div><div class="row-subtitle row-text" data-no-i18n></div></div>
+          <span class="status row-state" data-no-i18n></span>
         </div>
       </div>
 
@@ -176,7 +176,7 @@
         <h2 class="section-title">Latest releases</h2>
         <button class="link" data-goto="notes">All patch notes<svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></button>
       </div>
-      <div class="group" id="news"></div>
+      <div class="group" id="news" data-no-i18n></div>
       </div>
       </div>
 
@@ -193,7 +193,7 @@
           <p class="page-subtitle">Each version has its own folder for worlds and settings. Removing one keeps your worlds.</p>
         </div>
       </header>
-      <div class="group" id="version-list"></div>
+      <div class="group" id="version-list" data-no-i18n></div>
       <p class="fineprint">More Minecraft versions are on the way. When one is released, it shows up here on its own.</p>
     </section>
 
@@ -208,7 +208,7 @@
 
       <div class="customize-layout">
         <div class="group preview-card">
-          <p class="nametag" id="cz-nametag">Player</p>
+          <p class="nametag" id="cz-nametag" data-no-i18n>Player</p>
           <div class="preview-views">
             <figure>
               <canvas id="cz-front" width="160" height="320" role="img" aria-label="Your character from the front"></canvas>
@@ -233,7 +233,7 @@
             <h2 class="section-title" id="cz-skin-title">Skin</h2>
             <button class="link" id="cz-skin-upload"><svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg>Upload skin…</button>
           </div>
-          <div class="tile-grid" id="cz-skins" role="radiogroup" aria-labelledby="cz-skin-title"></div>
+          <div class="tile-grid" id="cz-skins" data-no-i18n role="radiogroup" aria-labelledby="cz-skin-title"></div>
           <p class="visibility-note">
             <svg class="icon" aria-hidden="true"><use href="#i-eye"/></svg>
             <span>With an offline account, other players see your skin only if they also play with Yukkit Toolkit, or if the server has a skins plugin.</span>
@@ -243,7 +243,7 @@
             <h2 class="section-title" id="cz-cape-title">Cape</h2>
             <button class="link" id="cz-cape-upload"><svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg>Upload cape…</button>
           </div>
-          <div class="tile-grid" id="cz-capes" role="radiogroup" aria-labelledby="cz-cape-title"></div>
+          <div class="tile-grid" id="cz-capes" data-no-i18n role="radiogroup" aria-labelledby="cz-cape-title"></div>
           <p class="visibility-note">
             <svg class="icon" aria-hidden="true"><use href="#i-eye"/></svg>
             <span>One cape at a time. Only players who also use Yukkit Toolkit see it.</span>
@@ -267,11 +267,11 @@
           <input type="search" id="notes-search" placeholder="Search patch notes" aria-label="Search patch notes" aria-controls="notes" aria-describedby="notes-count" spellcheck="false" autocomplete="off" />
           <kbd class="search-hint" aria-hidden="true">Ctrl F</kbd>
         </label>
-        <p class="notes-count" id="notes-count" aria-live="polite"></p>
+        <p class="notes-count" id="notes-count" data-no-i18n aria-live="polite"></p>
       </div>
 
-      <div id="notes"><p class="notes-empty">Loading…</p></div>
-      <nav class="pager hidden" id="notes-pager" aria-label="Patch notes pages"></nav>
+      <div id="notes" data-no-i18n><p class="notes-empty">Loading…</p></div>
+      <nav class="pager hidden" id="notes-pager" data-no-i18n aria-label="Patch notes pages"></nav>
     </section>
 
     <!-- SETTINGS -->
@@ -296,22 +296,37 @@
             <button role="radio" data-value="oled"><span class="theme-swatch swatch-oled" aria-hidden="true"></span><span>OLED</span></button>
           </div>
         </div>
+        <div class="group-row setting">
+          <div class="row-main">
+            <label class="row-title" for="s-language">Language</label>
+            <p class="row-subtitle" id="s-language-desc">Changes the launcher's text. Patch notes stay in English.</p>
+          </div>
+          <span class="select">
+            <select id="s-language" aria-describedby="s-language-desc">
+              <option value="">Automatic</option>
+              <option value="en" data-no-i18n lang="en">English</option>
+              <option value="pt" data-no-i18n lang="pt">Português</option>
+              <option value="es" data-no-i18n lang="es">Español</option>
+            </select>
+            <svg class="icon" aria-hidden="true"><use href="#i-chevron-updown"/></svg>
+          </span>
+        </div>
       </div>
 
       <h2 class="section-header section-title settings-group-title">Account</h2>
       <div class="group">
         <div class="group-row profile-row">
-          <span class="avatar avatar-lg" id="s-name-avatar" aria-hidden="true">P</span>
+          <span class="avatar avatar-lg" id="s-name-avatar" data-no-i18n aria-hidden="true">P</span>
           <div class="profile-main">
             <label class="row-title" for="s-username">Player name</label>
             <div class="name-field" id="s-name-box">
               <input id="s-username" maxlength="16" spellcheck="false" autocomplete="off"
                      aria-describedby="s-username-hint s-username-count" />
-              <span class="name-count" id="s-username-count" aria-live="off">0/16</span>
+              <span class="name-count" id="s-username-count" data-no-i18n aria-live="off">0/16</span>
             </div>
             <p class="name-hint" id="s-username-hint">
               <svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>
-              <span id="s-username-hint-text">What other players see. 3–16 letters, numbers or underscores.</span>
+              <span id="s-username-hint-text" data-no-i18n>What other players see. 3–16 letters, numbers or underscores.</span>
             </p>
           </div>
         </div>
@@ -346,7 +361,7 @@
             <p class="row-subtitle" id="s-memory-desc">4 GB suits most computers. More isn't always faster.</p>
           </div>
           <div class="memory-control">
-            <output class="memory-value" id="s-memory-label" for="s-memory">4 GB</output>
+            <output class="memory-value" id="s-memory-label" data-no-i18n for="s-memory">4 GB</output>
             <input type="range" class="slider" id="s-memory" min="1024" max="16384" step="512" aria-describedby="s-memory-desc" />
             <div class="slider-ticks" aria-hidden="true">
               <span style="--at: 0%">1</span>
@@ -374,7 +389,7 @@
         <div class="group-row setting stack">
           <div class="row-main">
             <div class="row-title" id="s-install-label">Install location</div>
-            <p class="setting-path" id="s-install" aria-labelledby="s-install-label"></p>
+            <p class="setting-path" id="s-install" data-no-i18n aria-labelledby="s-install-label"></p>
           </div>
           <div class="btn-group" role="group" aria-labelledby="s-install-label">
             <button class="btn btn-small" id="s-install-browse">Change…</button>
@@ -415,7 +430,7 @@
           <input class="field mono" id="s-game" placeholder="For example --width 1600" spellcheck="false" aria-describedby="s-game-desc" />
         </div>
       </div>
-      <p class="form-error" id="s-error" role="alert"></p>
+      <p class="form-error" id="s-error" data-no-i18n role="alert"></p>
     </section>
 
     <!-- LOGS -->
@@ -430,20 +445,22 @@
           <button class="btn btn-small btn-quiet" id="log-clear">Clear</button>
         </div>
       </header>
-      <pre class="log" id="log" tabindex="0" aria-label="Log output"></pre>
+      <pre class="log" id="log" data-no-i18n tabindex="0" aria-label="Log output"></pre>
     </section>
   </main>
 
   <dialog class="sheet" id="confirm-dialog" aria-labelledby="confirm-title" aria-describedby="confirm-text">
-    <h2 class="sheet-title" id="confirm-title"></h2>
-    <p class="sheet-text" id="confirm-text"></p>
+    <h2 class="sheet-title" id="confirm-title" data-no-i18n></h2>
+    <p class="sheet-text" id="confirm-text" data-no-i18n></p>
     <div class="sheet-actions">
       <button class="btn" id="confirm-cancel" autofocus>Cancel</button>
-      <button class="btn btn-destructive" id="confirm-ok"></button>
+      <button class="btn btn-destructive" id="confirm-ok" data-no-i18n></button>
     </div>
   </dialog>
 
-  <div class="toast hidden" id="toast" role="status" aria-live="polite"><svg class="icon" aria-hidden="true"><use href="#i-check-circle"/></svg><span id="toast-text"></span></div>
+  <div class="toast hidden" id="toast" role="status" aria-live="polite"><svg class="icon" aria-hidden="true"><use href="#i-check-circle"/></svg><span id="toast-text" data-no-i18n></span></div>
+  <script src="i18n.js"></script>
+  <script src="i18n-strings.js"></script>
   <script src="cosmetics.js"></script>
   <script src="app.js"></script>
 </body>
