@@ -62,3 +62,29 @@
   .memory-row .row-main { flex-basis: 100%; }
   .memory-control { width: 100%; }
 }
+
+/* ---------- Theme picker: three choices, each with a small preview of its background ---------- */
+.theme-picker { display: flex; gap: var(--space-2); flex-shrink: 0; }
+.theme-picker button {
+  display: flex; flex-direction: column; align-items: center; gap: var(--space-2);
+  width: 92px; padding: var(--space-2) var(--space-2) var(--space-2);
+  background: transparent; border: 1px solid transparent; border-radius: var(--radius-group);
+  color: var(--label); font: var(--type-callout);
+  transition: background var(--dur-fast), border-color var(--dur-fast);
+}
+.theme-picker button:hover { background: var(--fill-hover); }
+.theme-picker button.active { border-color: var(--accent-fill); background: var(--accent-tint); font-weight: 600; }
+.theme-swatch {
+  width: 72px; height: 44px; border-radius: var(--radius-control);
+  border: 1px solid var(--control-border); position: relative; overflow: hidden;
+}
+/* Each swatch is a tiny window: a sidebar strip and a content block, in that theme's colors */
+.theme-swatch::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 22px; background: var(--sw-side); }
+.theme-swatch::after { content: ""; position: absolute; left: 28px; right: 6px; top: 8px; height: 10px; border-radius: 3px; background: var(--sw-accent, #0066e0); }
+.swatch-system { background: linear-gradient(135deg, #fafafb 0 50%, #202023 50% 100%); --sw-side: rgba(127, 127, 127, .25); }
+.swatch-dark { background: #202023; --sw-side: #1c1c1e; }
+.swatch-oled { background: #000000; --sw-side: #000000; }
+.swatch-oled::before { border-right: 1px solid rgba(255, 255, 255, .14); }
+@media (forced-colors: active) {
+  .theme-picker button.active { outline: 2px solid Highlight; }
+}

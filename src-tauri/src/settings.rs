@@ -30,6 +30,8 @@ pub struct Settings {
     pub auto_update: bool,
     /// Keep the launcher window open while playing (otherwise it's minimized).
     pub keep_open: bool,
+    /// Interface theme: "system" follows Windows, "dark", or "oled" (pure black).
+    pub theme: String,
 }
 
 impl Default for Settings {
@@ -45,6 +47,7 @@ impl Default for Settings {
             previews: false,
             auto_update: true,
             keep_open: true,
+            theme: "system".into(),
         }
     }
 }
@@ -109,6 +112,9 @@ impl Settings {
                 "Check the install location",
                 "The install location must be a full folder path, like C:\\Games\\Yukkit. Use Browse to pick one.",
             ));
+        }
+        if !matches!(self.theme.as_str(), "system" | "dark" | "oled") {
+            return Err(friendly("Check the theme", "Pick Automatic, Dark or OLED as the interface theme."));
         }
         let java = self.java_path.trim();
         if !java.is_empty() && !Path::new(java).is_file() {

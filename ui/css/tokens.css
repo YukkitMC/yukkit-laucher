@@ -141,9 +141,67 @@
   }
 }
 
+/* ---------- Theme chosen in Settings (overrides the system appearance) ---------- */
+:root[data-theme="dark"],
+:root[data-theme="oled"] {
+  color-scheme: dark;
+  --bg-window: #1c1c1e;
+  --bg-canvas: #202023;
+  --bg-canvas-mica: rgba(36, 36, 40, .58);
+  --bg-surface: #2a2a2d;
+  --bg-sunken: #18181a;
+
+  --label: #f2f2f5;          /* 12.8:1 */
+  --label-2: #a8a8b0;        /*  6.0:1 */
+  --label-3: #94949c;        /*  4.8:1 */
+  --separator: rgba(255, 255, 255, .09);
+  --control-border: #7a7a82; /*  3.4:1 */
+
+  --fill-hover: rgba(255, 255, 255, .06);
+  --fill-pressed: rgba(255, 255, 255, .1);
+  --fill-selected: rgba(255, 255, 255, .085);
+  --fill-control: #333337;
+  --fill-track: #4a4a50;
+
+  --accent: #5aa5ff;         /*  5.6:1 */
+  --accent-fill: #0066e0;
+  --accent-fill-hover: #1a75ea;
+  --accent-fill-pressed: #0058c4;
+  --accent-tint: rgba(64, 150, 255, .16);
+
+  --ok: #32d17a;             /*  7.2:1 */
+  --ok-tint: rgba(50, 209, 122, .14);
+  --caution: #ffc93c;        /*  9.3:1 */
+  --caution-tint: rgba(255, 201, 60, .13);
+  --danger: #ff7070;         /*  5.3:1 */
+  --danger-tint: rgba(255, 112, 112, .12);
+  --danger-text: #ff7070;    /* on its tint 5.0:1 */
+
+  --focus-ring: #5aa5ff;
+  --shadow-float: 0 8px 28px rgba(0, 0, 0, .45), 0 0 0 1px rgba(255, 255, 255, .06);
+
+  --glass-fill: rgba(44, 44, 48, .74);
+  --glass-border: rgba(255, 255, 255, .1);
+}
+
+/* OLED: literally black. Pixels off on OLED screens; surfaces separate by hairlines, not by grey fills. */
+:root[data-theme="oled"] {
+  --bg-window: #000000;
+  --bg-canvas: #000000;
+  --bg-canvas-mica: #000000;
+  --bg-surface: #0a0a0b;     /* label 18.6:1, label-2 8.4:1, label-3 6.4:1 */
+  --bg-sunken: #000000;
+  --fill-control: #121214;
+  --fill-track: #2c2c30;
+  --separator: rgba(255, 255, 255, .12);
+  --glass-fill: rgba(0, 0, 0, .82);
+  --glass-border: rgba(255, 255, 255, .14);
+  --shadow-float: 0 0 0 1px rgba(255, 255, 255, .14);
+}
+
 /* ---------- Increase contrast (Windows contrast themes off, "more contrast" requested) ---------- */
 @media (prefers-contrast: more) {
-  :root {
+  :root:not([data-theme]) {
     --label-2: #3c3c43;
     --label-3: #4f4f56;
     --separator: rgba(0, 0, 0, .28);
@@ -153,7 +211,8 @@
   }
 }
 @media (prefers-contrast: more) and (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme]),
+  :root[data-theme] {
     --label-2: #d0d0d6;
     --label-3: #bcbcc4;
     --separator: rgba(255, 255, 255, .3);
@@ -167,5 +226,15 @@
     --bg-canvas-mica: var(--bg-canvas);
     --glass-fill: var(--bg-surface);
     --glass-blur: none;
+  }
+}
+@media (prefers-contrast: more) {
+  :root[data-theme] {
+    --label-2: #d0d0d6;
+    --label-3: #bcbcc4;
+    --separator: rgba(255, 255, 255, .3);
+    --control-border: #a8a8b0;
+    --bg-canvas-mica: var(--bg-canvas);
+    --glass-fill: var(--bg-surface);
   }
 }

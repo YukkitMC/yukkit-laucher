@@ -47,16 +47,30 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "F5") { e.preventDefault(); refresh(); }
 });
 
-/* ---------- Window material ----------
+/* ---------- Window material and theme ----------
  * The window uses Mica on Windows 11 (tauri.conf.json). Windows 10 has no Mica, so the page keeps
- * its opaque background there. Windows 11 reports platformVersion 13 or higher. */
+ * its opaque background there. Windows 11 reports platformVersion 13 or higher.
+ * Mica follows the Windows appearance, so it is only shown with the Automatic theme. */
+let micaAvailable = false;
+let currentTheme = document.documentElement.dataset.theme || "system";
 (async () => {
   try {
     if (!tauri || !navigator.userAgentData) return;
     const { platform, platformVersion } = await navigator.userAgentData.getHighEntropyValues(["platformVersion"]);
-    if (platform === "Windows" && parseInt(platformVersion, 10) >= 13) document.documentElement.classList.add("mica");
+    micaAvailable = platform === "Windows" && parseInt(platformVersion, 10) >= 13;
+    applyTheme(currentTheme);
   } catch {}
 })();
+
+function applyTheme(theme) {
+  currentTheme = theme;
+  const root = document.documentElement;
+  if (theme === "system") delete root.dataset.theme; else root.dataset.theme = theme;
+  root.classList.toggle("mica", micaAvailable && theme === "system");
+  try { localStorage.setItem("yukkit-theme", theme); } catch {}
+  // Title bar and window frame follow the chosen theme too.
+  try { if (tauri) tauri.window.getCurrentWindow().setTheme(theme === "system" ? null : "dark").catch(() => {}); } catch {}
+}
 
 /* ---------- Confirmation sheet ----------
  * Replaces window.confirm(): named destructive action, Cancel is the default and Esc cancels. */
@@ -556,7 +570,7 @@ function setSeg(id, value) {
   });
 }
 // Radio-group keyboard behavior for segmented controls: arrow keys choose the neighbor.
-document.querySelectorAll(".segmented[role=radiogroup]").forEach((group) => {
+document.querySelectorAll("[role=radiogroup]").forEach((group) => {
   group.addEventListener("keydown", (e) => {
     const keys = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 };
     if (!(e.key in keys)) return;
@@ -601,6 +615,8 @@ async function loadSettings() {
   $("s-jvm").value = s.jvmArgs;
   $("s-game").value = s.gameArgs;
   setSeg("s-keep", s.keepOpen ? "open" : "min");
+  setSeg("s-theme", s.theme || "system");
+  applyTheme(s.theme || "system");
 }
 
 async function saveSettings(patch, quietToast) {
@@ -656,6 +672,11 @@ $("s-channel").querySelectorAll("button").forEach((b) => (b.onclick = () => {
   setSeg("s-channel", b.dataset.value);
   state.notes = null;
   saveSettings({ previews: b.dataset.value === "preview" });
+}));
+$("s-theme").querySelectorAll("button").forEach((b) => (b.onclick = () => {
+  setSeg("s-theme", b.dataset.value);
+  applyTheme(b.dataset.value);
+  saveSettings({ theme: b.dataset.value });
 }));
 $("s-keep").querySelectorAll("button").forEach((b) => (b.onclick = () => {
   setSeg("s-keep", b.dataset.value);

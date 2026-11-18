@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Yukkit Launcher</title>
   <link rel="icon" href="img/yukkit.svg" />
+  <script>
+    try { const t = localStorage.getItem("yukkit-theme"); if (t === "dark" || t === "oled") document.documentElement.dataset.theme = t; } catch {}
+  </script>
   <link rel="stylesheet" href="css/tokens.css" />
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/components.css" />
@@ -219,6 +222,21 @@
           <p class="page-subtitle">Changes save on their own.</p>
         </div>
       </header>
+
+      <h2 class="section-header section-title settings-group-title">Appearance</h2>
+      <div class="group">
+        <div class="group-row setting stack">
+          <div class="row-main">
+            <div class="row-title" id="s-theme-label">Theme</div>
+            <p class="row-subtitle" id="s-theme-desc">Automatic follows Windows. OLED turns the background fully black.</p>
+          </div>
+          <div class="theme-picker" id="s-theme" role="radiogroup" aria-labelledby="s-theme-label" aria-describedby="s-theme-desc">
+            <button role="radio" data-value="system"><span class="theme-swatch swatch-system" aria-hidden="true"></span><span>Automatic</span></button>
+            <button role="radio" data-value="dark"><span class="theme-swatch swatch-dark" aria-hidden="true"></span><span>Dark</span></button>
+            <button role="radio" data-value="oled"><span class="theme-swatch swatch-oled" aria-hidden="true"></span><span>OLED</span></button>
+          </div>
+        </div>
+      </div>
 
       <h2 class="section-header section-title settings-group-title">Account</h2>
       <div class="group">
