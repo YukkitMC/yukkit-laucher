@@ -32,31 +32,43 @@
 }
 
 .sidebar-foot { margin-top: auto; display: flex; flex-direction: column; gap: var(--space-2); }
+/* Player chip: an offline account is a status, so it carries the status color (red) */
 .player {
   display: flex; align-items: center; gap: var(--space-3);
-  min-height: 44px; padding: var(--space-1) var(--space-3);
-  background: transparent; border: 0; border-radius: var(--radius-control);
-  text-align: left; transition: background var(--dur-fast);
+  min-height: 52px; padding: var(--space-2) var(--space-3);
+  background: var(--danger-tint);
+  border: 1px solid color-mix(in srgb, var(--danger) 28%, transparent);
+  border-radius: var(--radius-group);
+  text-align: left; transition: background var(--dur-fast), border-color var(--dur-fast);
 }
-.player:hover { background: var(--fill-hover); }
-.player:active { background: var(--fill-pressed); }
+.player:hover { background: color-mix(in srgb, var(--danger) 16%, transparent); border-color: color-mix(in srgb, var(--danger) 45%, transparent); }
+.player:active { background: color-mix(in srgb, var(--danger) 22%, transparent); }
 .avatar {
-  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
   display: grid; place-items: center;
-  background: var(--fill-pressed); color: var(--label);
+  background: var(--danger-fill); color: var(--on-accent);
   font: var(--type-body-strong);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), 0 0 0 2px var(--bg-window), 0 0 0 3px color-mix(in srgb, var(--danger) 55%, transparent);
 }
-.player-text { display: flex; flex-direction: column; min-width: 0; }
+.player-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .player-name { font: var(--type-body-strong); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.player-mode { font: var(--type-footnote); color: var(--label-2); }
+.player-mode { display: inline-flex; align-items: center; gap: var(--space-1); font: 600 .75rem/1rem var(--font-text); color: var(--danger-text); }
+.player-mode .icon { width: 12px; height: 12px; }
 
 .foot-row {
   display: flex; justify-content: space-between; align-items: center; gap: var(--space-2);
-  padding: 0 var(--space-3); color: var(--label-2); font: var(--type-footnote); white-space: nowrap;
+  padding: 0 var(--space-1) 0 var(--space-3); color: var(--label-2); font: var(--type-footnote); white-space: nowrap;
 }
-.foot-links { display: flex; gap: var(--space-3); }
-.foot-links .link { font: var(--type-footnote); color: var(--label-2); }
-.foot-links .link:hover { color: var(--label); }
+.foot-links { display: flex; gap: var(--space-1); }
+.foot-icon {
+  display: grid; place-items: center; width: 32px; height: 32px;
+  background: transparent; border: 0; border-radius: var(--radius-control); color: var(--label-2);
+  transition: background var(--dur-fast), color var(--dur-fast);
+}
+.foot-icon img { width: 18px; height: 18px; }
+.foot-icon .icon { width: 18px; height: 18px; }
+.foot-icon:hover { background: var(--fill-hover); color: var(--label); }
+.foot-icon:active { background: var(--fill-pressed); }
 
 @media (forced-colors: active) {
   .nav-item[aria-current="page"] { outline: 1px solid Highlight; }
