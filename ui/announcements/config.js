@@ -2,8 +2,8 @@
 const ANNOUNCEMENTS_CONFIG = Object.freeze({
   /** Public Blogger feed (JSON). max-results caps how many posts are loaded. */
   feedUrl: "https://yukkitmc.blogspot.com/feeds/posts/default?alt=json&max-results=20",
-  /** Don't ask the blog again sooner than this. */
-  refreshEveryMs: 10 * 60 * 1000,
+  /** How often the blog is checked for new posts (and the shortest gap between two checks). */
+  refreshEveryMs: 3 * 60 * 1000,
   /** Length of the plain-text summary on cards. */
   excerptLength: 160,
   /** Hosts allowed inside <iframe> in posts (YouTube embeds). */

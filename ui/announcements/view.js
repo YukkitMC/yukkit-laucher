@@ -233,8 +233,9 @@ const AnnouncementsView = (() => {
       if (openId) { const p = S.find(openId); if (p) renderReader(p); } else renderList(S.state);
     });
     S.load();
-    // Keep the badge current while the launcher stays open; the service throttles to 10 minutes.
-    setInterval(() => S.load(), C.refreshEveryMs);
+    // Check often and let the service decide: it only asks the blog once refreshEveryMs has passed
+    // since the last answer, so posts show up within that time (3 minutes) while the launcher is open.
+    setInterval(() => S.load(), 30 * 1000);
   }
 
   /** Called when the page becomes visible. */
