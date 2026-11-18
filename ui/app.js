@@ -16,7 +16,7 @@ const state = {
 };
 
 /* ---------- Navigation ---------- */
-const PAGES = ["play", "versions", "customize", "notes", "settings", "logs"];
+const PAGES = ["play", "versions", "customize", "announcements", "notes", "settings", "logs"];
 function showPage(name) {
   document.querySelectorAll(".nav-item").forEach((b) => {
     const on = b.dataset.page === name;
@@ -27,6 +27,7 @@ function showPage(name) {
   if (name === "logs") renderLog();
   if (name === "notes") loadNotes();
   if (name === "customize") loadCustomize();
+  if (name === "announcements") AnnouncementsView.show();
   $("notice").classList.toggle("on-other-page", name !== "play");
 }
 document.querySelectorAll(".nav-item").forEach((b) => b.addEventListener("click", () => showPage(b.dataset.page)));
@@ -34,7 +35,10 @@ document.querySelectorAll("[data-goto]").forEach((b) => b.addEventListener("clic
 $("player-chip").onclick = () => { showPage("settings"); $("s-username").focus(); };
 $("change-name").onclick = $("player-chip").onclick;
 document.querySelectorAll("[data-href]").forEach((b) => (b.onclick = () => openLink(b.dataset.href)));
-function openLink(url) { invoke("open_link", { url }).catch(showError); }
+function openLink(url) {
+  if (!tauri) { window.open(url, "_blank", "noopener"); return; } // browser preview
+  invoke("open_link", { url }).catch(showError);
+}
 
 /* ---------- Keyboard shortcuts ----------
  * Ctrl+1…5 sections, Ctrl+, Settings, F5 re-checks status (instead of reloading the page). */
@@ -972,5 +976,6 @@ async function mockInvoke(cmd) {
 }
 
 I18n.translatePage();
+AnnouncementsView.init(openLink);
 loadSettings().catch(showError);
 refresh();

@@ -2,6 +2,24 @@
 // Keep the {placeholders} exactly as they are in the English key.
 
 Object.assign(I18n.DICT.pt, {
+  // Announcements
+  "Announcements (Ctrl+4)": "Anúncios (Ctrl+4)",
+  "Announcements": "Anúncios",
+  "Patch notes (Ctrl+5)": "Novidades (Ctrl+5)",
+  "Logs (Ctrl+7)": "Registros (Ctrl+7)",
+  "News from the Yukkit team.": "Notícias da equipe Yukkit.",
+  "Latest": "Mais recente",
+  "Untitled post": "Post sem título",
+  "Couldn't load announcements": "Não foi possível carregar os anúncios",
+  "Check your internet connection and try again.": "Confira sua conexão com a internet e tente de novo.",
+  "You're offline. Showing what was saved on {when}.": "Você está offline. Mostrando o que foi salvo em {when}.",
+  "No announcements yet": "Nenhum anúncio ainda",
+  "When the Yukkit team posts news, it shows up here.": "Quando a equipe Yukkit publicar novidades, elas aparecem aqui.",
+  "All announcements": "Todos os anúncios",
+  "Open on Blogger": "Abrir no Blogger",
+  "1 new": "1 novo",
+  "{n} new": "{n} novos",
+
   // Sidebar
   "Sections": "Seções",
   "Play (Ctrl+1)": "Jogar (Ctrl+1)",
@@ -10,11 +28,9 @@ Object.assign(I18n.DICT.pt, {
   "Versions": "Versões",
   "Customize (Ctrl+3)": "Personalizar (Ctrl+3)",
   "Customize": "Personalizar",
-  "Patch notes (Ctrl+4)": "Novidades (Ctrl+4)",
   "Patch notes": "Novidades",
   "Settings (Ctrl+,)": "Configurações (Ctrl+,)",
   "Settings": "Configurações",
-  "Logs (Ctrl+6)": "Registros (Ctrl+6)",
   "Logs": "Registros",
   "Change your name in Settings": "Mude seu nome nas Configurações",
   "Offline account": "Conta offline",
@@ -214,6 +230,24 @@ Object.assign(I18n.DICT.pt, {
 });
 
 Object.assign(I18n.DICT.es, {
+  // Announcements
+  "Announcements (Ctrl+4)": "Anuncios (Ctrl+4)",
+  "Announcements": "Anuncios",
+  "Patch notes (Ctrl+5)": "Novedades (Ctrl+5)",
+  "Logs (Ctrl+7)": "Registros (Ctrl+7)",
+  "News from the Yukkit team.": "Noticias del equipo de Yukkit.",
+  "Latest": "Lo más reciente",
+  "Untitled post": "Entrada sin título",
+  "Couldn't load announcements": "No se pudieron cargar los anuncios",
+  "Check your internet connection and try again.": "Revisa tu conexión a internet y vuelve a intentarlo.",
+  "You're offline. Showing what was saved on {when}.": "Sin conexión. Mostrando lo guardado el {when}.",
+  "No announcements yet": "Aún no hay anuncios",
+  "When the Yukkit team posts news, it shows up here.": "Cuando el equipo de Yukkit publique noticias, aparecerán aquí.",
+  "All announcements": "Todos los anuncios",
+  "Open on Blogger": "Abrir en Blogger",
+  "1 new": "1 nuevo",
+  "{n} new": "{n} nuevos",
+
   // Sidebar
   "Sections": "Secciones",
   "Play (Ctrl+1)": "Jugar (Ctrl+1)",
@@ -222,11 +256,9 @@ Object.assign(I18n.DICT.es, {
   "Versions": "Versiones",
   "Customize (Ctrl+3)": "Personalizar (Ctrl+3)",
   "Customize": "Personalizar",
-  "Patch notes (Ctrl+4)": "Novedades (Ctrl+4)",
   "Patch notes": "Novedades",
   "Settings (Ctrl+,)": "Ajustes (Ctrl+,)",
   "Settings": "Ajustes",
-  "Logs (Ctrl+6)": "Registros (Ctrl+6)",
   "Logs": "Registros",
   "Change your name in Settings": "Cambia tu nombre en Ajustes",
   "Offline account": "Cuenta sin conexión",

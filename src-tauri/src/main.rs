@@ -229,6 +229,27 @@ struct CosmeticsView {
     custom_cape: Option<Vec<u8>>,
 }
 
+/// Downloads the project's public Blogger feed for the Announcements page.
+/// Fetched here rather than in the page so CORS never gets in the way. Only Blogger feed
+/// URLs are accepted, so the page can't use this to fetch arbitrary addresses.
+#[tauri::command]
+async fn fetch_blog_feed(url: String) -> Result<serde_json::Value, UiError> {
+    let host = url
+        .strip_prefix("https://")
+        .and_then(|rest| rest.split(['/', '?']).next())
+        .unwrap_or("");
+    let blogger = host.ends_with(".blogspot.com") || host == "www.blogger.com";
+    if !blogger || !url.contains("/feeds/") {
+        return Err(UiError::new("Feed blocked", "Announcements can only be loaded from a Blogger feed over https."));
+    }
+    net::get_json::<serde_json::Value>(&url).await.map_err(|err| {
+        let mut e = UiError::from(err);
+        e.title = "Couldn't load announcements".into();
+        e.message = "Check your internet connection and try again.".into();
+        e
+    })
+}
+
 #[tauri::command]
 fn get_cosmetics() -> CosmeticsView {
     CosmeticsView {
@@ -352,6 +373,7 @@ fn main() {
             pick_java,
             open_install_folder,
             open_link,
+            fetch_blog_feed,
             get_cosmetics,
             pick_cosmetic,
             set_cosmetic

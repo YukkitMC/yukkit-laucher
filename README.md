@@ -127,6 +127,9 @@ ui/                     the interface (index.html, app.js)
   i18n.js               interface language (English, Português, Español)
   i18n-strings.js       translations, keyed by the English text
   cosmetics.js          preset skins and capes, character preview
+  announcements/        Announcements page: config.js (blog feed URL), service.js (fetch,
+                        cache, unread), view.js (list, cards, reader, states)
+  vendor/               DOMPurify 3.2.4 (sanitizes blog post HTML)
 versions.json           versions the launcher offers
 src-tauri/src/
   main.rs               commands the interface calls
