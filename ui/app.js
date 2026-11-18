@@ -42,6 +42,7 @@ document.addEventListener("keydown", (e) => {
     const n = Number(e.key);
     if (n >= 1 && n <= PAGES.length) { e.preventDefault(); showPage(PAGES[n - 1]); return; }
     if (e.key === ",") { e.preventDefault(); showPage("settings"); return; }
+    if (e.key.toLowerCase() === "f" && $("page-notes").classList.contains("active")) { e.preventDefault(); $("notes-search").focus(); $("notes-search").select(); return; }
   }
   if (e.key === "F5") { e.preventDefault(); refresh(); }
 });
@@ -402,16 +403,67 @@ async function loadNotes(quiet) {
     try {
       state.notes = await invoke("get_patch_notes");
     } catch (e) {
-      if (!quiet) $("notes").innerHTML = `<p class="notes-empty">Patch notes need an internet connection. ${esc(normalizeError(e).message)}</p>`;
+      if (!quiet) {
+        $("notes").innerHTML = `<p class="notes-empty">Patch notes need an internet connection. ${esc(normalizeError(e).message)}</p>`;
+        $("notes-pager").classList.add("hidden");
+        $("notes-count").textContent = "";
+      }
       renderNews();
       return;
     }
   }
   renderNews();
+  renderNotes();
+}
+
+/* Search and pages for patch notes. Filtering happens on the releases already loaded. */
+const NOTES_PER_PAGE = 3;
+state.notesQuery = "";
+state.notesPage = 1;
+
+function filteredNotes() {
+  const q = state.notesQuery.trim().toLowerCase();
+  const list = (state.notes || []).map((r, i) => ({ r, i }));
+  if (!q) return list;
+  return list.filter(({ r }) => [r.title, r.tag, r.notes].some((t) => String(t || "").toLowerCase().includes(q)));
+}
+
+function renderNotes() {
   const box = $("notes");
-  if (!state.notes.length) { box.innerHTML = `<p class="notes-empty">No releases yet.</p>`; return; }
-  box.innerHTML = state.notes
-    .map((r, i) => `
+  const pager = $("notes-pager");
+  const count = $("notes-count");
+  if (!state.notes) return;
+  if (!state.notes.length) {
+    box.innerHTML = `<p class="notes-empty">No releases yet.</p>`;
+    pager.classList.add("hidden");
+    count.textContent = "";
+    return;
+  }
+  const hits = filteredNotes();
+  const pages = Math.max(1, Math.ceil(hits.length / NOTES_PER_PAGE));
+  state.notesPage = Math.min(Math.max(1, state.notesPage), pages);
+  const start = (state.notesPage - 1) * NOTES_PER_PAGE;
+  const shown = hits.slice(start, start + NOTES_PER_PAGE);
+
+  const q = state.notesQuery.trim();
+  count.textContent = q
+    ? `${hits.length} ${hits.length === 1 ? "release matches" : "releases match"} "${q}"`
+    : `${hits.length} ${hits.length === 1 ? "release" : "releases"}`;
+
+  if (!hits.length) {
+    box.innerHTML = `
+      <div class="notes-empty-state">
+        <p class="notes-empty-title">No release mentions "${esc(q)}"</p>
+        <p class="notes-empty">Try a module name, a version such as alpha.3, or a shorter word.</p>
+        <button class="btn btn-small" id="notes-clear">Clear search</button>
+      </div>`;
+    $("notes-clear").onclick = () => { setNotesQuery(""); $("notes-search").focus(); };
+    pager.classList.add("hidden");
+    return;
+  }
+
+  box.innerHTML = shown
+    .map(({ r, i }) => `
       <article class="release">
         <div class="release-head">
           <h2 class="release-title">${esc(shortTitle(r.title))}</h2>
@@ -422,7 +474,77 @@ async function loadNotes(quiet) {
       </article>`)
     .join("");
   box.querySelectorAll("[data-release]").forEach((b) => (b.onclick = () => openLink(state.notes[b.dataset.release].url)));
+  if (q) highlight(box.querySelectorAll(".release-title, .md"), q);
+  renderPager(pages);
 }
+
+function renderPager(pages) {
+  const pager = $("notes-pager");
+  pager.classList.toggle("hidden", pages <= 1);
+  if (pages <= 1) { pager.innerHTML = ""; return; }
+  const cur = state.notesPage;
+  // First, last, and the pages next to the current one; gaps become an ellipsis.
+  const nums = [...new Set([1, cur - 1, cur, cur + 1, pages])].filter((n) => n >= 1 && n <= pages).sort((a, b) => a - b);
+  const items = [];
+  nums.forEach((n, k) => {
+    if (k && n - nums[k - 1] > 1) items.push(`<span class="pager-gap" aria-hidden="true">…</span>`);
+    items.push(`<button class="pager-num" data-page-n="${n}" ${n === cur ? 'aria-current="page"' : ""} aria-label="Page ${n} of ${pages}">${n}</button>`);
+  });
+  pager.innerHTML = `
+    <button class="btn btn-small btn-quiet" data-page-n="${cur - 1}" ${cur === 1 ? "disabled" : ""}><svg class="icon" aria-hidden="true"><use href="#i-chevron-left"/></svg>Newer</button>
+    <div class="pager-nums">${items.join("")}</div>
+    <button class="btn btn-small btn-quiet" data-page-n="${cur + 1}" ${cur === pages ? "disabled" : ""}>Older<svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></button>`;
+  pager.querySelectorAll("[data-page-n]").forEach((b) => (b.onclick = () => goToNotesPage(Number(b.dataset.pageN))));
+}
+
+function goToNotesPage(n) {
+  state.notesPage = n;
+  renderNotes();
+  $("notes-title").scrollIntoView({ block: "start" });
+  const first = $("notes").querySelector(".release-title");
+  if (first) { first.tabIndex = -1; first.focus({ preventScroll: true }); }
+}
+
+function setNotesQuery(q) {
+  state.notesQuery = q;
+  state.notesPage = 1;
+  $("notes-search").value = q;
+  renderNotes();
+}
+
+/* Wraps each match in <mark> by walking text nodes, so the escaped Markdown HTML stays intact. */
+function highlight(roots, q) {
+  const needle = q.toLowerCase();
+  roots.forEach((root) => {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) if (walker.currentNode.nodeValue.toLowerCase().includes(needle)) nodes.push(walker.currentNode);
+    nodes.forEach((node) => {
+      const text = node.nodeValue;
+      const lower = text.toLowerCase();
+      const frag = document.createDocumentFragment();
+      let at = 0, hit;
+      while ((hit = lower.indexOf(needle, at)) !== -1) {
+        frag.append(text.slice(at, hit));
+        const m = document.createElement("mark");
+        m.textContent = text.slice(hit, hit + needle.length);
+        frag.append(m);
+        at = hit + needle.length;
+      }
+      frag.append(text.slice(at));
+      node.replaceWith(frag);
+    });
+  });
+}
+
+let notesSearchTimer;
+$("notes-search").addEventListener("input", (e) => {
+  clearTimeout(notesSearchTimer);
+  notesSearchTimer = setTimeout(() => setNotesQuery(e.target.value), 120);
+});
+$("notes-search").addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && e.target.value) { e.preventDefault(); e.stopPropagation(); setNotesQuery(""); }
+});
 
 /* ---------- Settings (auto-save) ---------- */
 function setSeg(id, value) {

@@ -217,3 +217,44 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .28); }
   .segmented button.active { outline: 2px solid Highlight; outline-offset: -2px; }
   .switch input:checked + .switch-track { background: Highlight; }
 }
+
+/* ---------- Search field ---------- */
+.search-field {
+  position: relative; display: flex; align-items: center; gap: var(--space-2);
+  height: 36px; padding: 0 var(--space-2) 0 var(--space-3);
+  background: var(--fill-control); color: var(--label-2);
+  border: 1px solid var(--control-border); border-radius: var(--radius-pill);
+  transition: border-color var(--dur-fast), box-shadow var(--dur-fast);
+}
+.search-field:hover { border-color: var(--label-2); }
+.search-field:focus-within { border-color: var(--focus-ring); box-shadow: 0 0 0 1px var(--focus-ring); }
+.search-field input {
+  flex: 1; min-width: 0; height: 100%; padding: 0; border: 0; background: transparent;
+  color: var(--label); font: var(--type-body); outline: none; user-select: text;
+}
+.search-field input::placeholder { color: var(--label-3); }
+.search-field input::-webkit-search-cancel-button { cursor: default; }
+.search-hint {
+  font: var(--type-caption); color: var(--label-2); padding: 2px var(--space-2);
+  border: 1px solid var(--separator); border-radius: var(--radius-control); white-space: nowrap;
+}
+.search-field:focus-within .search-hint { display: none; }
+
+mark { background: color-mix(in srgb, var(--caution) 32%, transparent); color: inherit; border-radius: 3px; padding: 0 1px; }
+
+/* ---------- Pager ---------- */
+.pager { display: flex; align-items: center; justify-content: center; gap: var(--space-2); margin-top: var(--space-5); }
+.pager-nums { display: flex; align-items: center; gap: 2px; }
+.pager-num {
+  min-width: var(--control-height); height: var(--control-height); padding: 0 var(--space-2);
+  background: transparent; border: 0; border-radius: var(--radius-control);
+  color: var(--label); font: var(--type-callout); font-variant-numeric: tabular-nums;
+  transition: background var(--dur-fast);
+}
+.pager-num:hover { background: var(--fill-hover); }
+.pager-num[aria-current="page"] { background: var(--accent-fill); color: var(--on-accent); font-weight: 600; }
+.pager-gap { color: var(--label-3); padding: 0 var(--space-1); }
+@media (forced-colors: active) {
+  .search-field { border: 1px solid CanvasText; }
+  .pager-num[aria-current="page"] { outline: 2px solid Highlight; }
+}

@@ -191,13 +191,24 @@
 
     <!-- PATCH NOTES -->
     <section class="page" id="page-notes" aria-labelledby="notes-title">
-      <header class="page-header">
+      <header class="page-header notes-header">
         <div>
           <h1 class="page-title" id="notes-title">Patch notes</h1>
           <p class="page-subtitle">What changed in each Yukkit Toolkit release, newest first.</p>
         </div>
       </header>
-      <div id="notes" aria-live="polite"><p class="notes-empty">Loading…</p></div>
+
+      <div class="notes-toolbar" role="search">
+        <label class="search-field">
+          <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
+          <input type="search" id="notes-search" placeholder="Search patch notes" aria-label="Search patch notes" aria-controls="notes" aria-describedby="notes-count" spellcheck="false" autocomplete="off" />
+          <kbd class="search-hint" aria-hidden="true">Ctrl F</kbd>
+        </label>
+        <p class="notes-count" id="notes-count" aria-live="polite"></p>
+      </div>
+
+      <div id="notes"><p class="notes-empty">Loading…</p></div>
+      <nav class="pager hidden" id="notes-pager" aria-label="Patch notes pages"></nav>
     </section>
 
     <!-- SETTINGS -->
